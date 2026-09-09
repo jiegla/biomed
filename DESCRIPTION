@@ -1,0 +1,27 @@
+Package: biomed
+Title: Clinical and Biomedical Research Utilities
+Version: 0.0.0.9000
+Authors@R:
+    person("Guangling", "Jie", , "104247086+jiegla@users.noreply.github.com",
+           role = c("aut", "cre"))
+Description: Reusable, auditable tools for clinical and biomedical research,
+    including cohort preparation, endpoint analysis, biomarker exploration,
+    omics workflows, and publication-ready reporting. The package is intended
+    for research use and does not provide medical advice or clinical decision
+    support.
+License: MIT + file LICENSE
+URL: https://github.com/jiegla/biomed
+BugReports: https://github.com/jiegla/biomed/issues
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+Depends:
+    R (>= 4.3.0)
+Imports:
+    cli
+Suggests:
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+VignetteBuilder: knitr
