@@ -18,10 +18,20 @@ RoxygenNote: 7.3.3
 Depends:
     R (>= 4.3.0)
 Imports:
-    cli
+    cli,
+    ggplot2,
+    grid,
+    rlang,
+    scales,
+    survival
 Suggests:
+    ggsci,
     knitr,
+    openxlsx,
+    pROC,
     rmarkdown,
+    survminer,
+    VennDiagram,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 VignetteBuilder: knitr

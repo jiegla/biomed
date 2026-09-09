@@ -29,7 +29,21 @@ The package is under active development. After the repository is available:
 pak::pak("jiegla/biomed")
 ```
 
-## First utility
+## Included utilities
+
+| Function | Purpose |
+|---|---|
+| `makegroup()` | Reproducible median, survival, or ROC-derived cutoffs |
+| `batch_ANOVA()` | Batch one-way ANOVA with BH-adjusted p-values |
+| `chi_square_batch_df()` | Batch chi-square/Fisher association tests |
+| `cophx_batch()` | Batch univariable Cox regression |
+| `roc_batch()` | Batch ROC metrics and confidence intervals |
+| `plot_roc_batch()` | ROC figures returned as reusable ggplot objects |
+| `donutPie()` | Donut charts for categorical variables |
+| `draw_stack_barplot()` | Proportional stacked bars with association tests |
+| `vennjgl()` | Venn diagrams and intersection-member tables |
+
+## Quick start
 
 ```r
 library(biomed)
@@ -40,9 +54,22 @@ cohort <- data.frame(
 )
 
 biomed_check_columns(cohort, c("patient_id", "response"))
+
+analysis_data <- data.frame(
+  response = factor(c("No", "No", "Yes", "Yes")),
+  biomarker = c(0.8, 1.2, 2.7, 3.1)
+)
+
+grouped <- makegroup(analysis_data, "biomarker", method = "median")
+donutPie(grouped, "biomarker_binary")
 ```
 
-## Proposed modules
+ROC, maximally selected survival cutoffs, Venn diagrams, and XLSX output use
+suggested packages that are installed on demand by users who need those
+features. Functions do not require patient identifiers, and examples and tests
+use synthetic data only.
+
+## Roadmap modules
 
 - `clinical`: cohort cleaning, endpoint derivation, response and survival.
 - `biomarker`: subgroup, interaction, multivariable, and validation workflows.
