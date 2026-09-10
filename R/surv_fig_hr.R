@@ -23,3 +23,18 @@ surv_fig_hr <- function(group_var, df, max_time = 60, time = "OS",
   }
   gp
 }
+
+#' Draw a complete survival plot on the current graphics page
+#'
+#' Registered automatically for grid drawing and ggplot2::ggsave. Uses the
+#' survminer print method through standard S3 dispatch, retaining risk tables.
+#' @param x A survminer ggsurvplot object.
+#' @param recording Compatibility argument for grid.draw.
+#' @rdname surv_fig_hr
+#' @importFrom grid grid.draw
+#' @export
+grid.draw.ggsurvplot <- function(x, recording = TRUE) {
+  .biomed_require("survminer")
+  print(x, newpage = FALSE)
+  invisible(x)
+}

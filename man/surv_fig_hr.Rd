@@ -1,12 +1,17 @@
 \name{surv_fig_hr}
 \alias{surv_fig_hr}
+\alias{grid.draw.ggsurvplot}
 \title{Legacy Kaplan-Meier plot interface}
 \usage{
 surv_fig_hr(group_var, df, max_time = 60, time = "OS",
                         status = "Survival_status", hr = "yes", cols = NULL,
                         x.label = "Months", output_dir = "Surv_Output", ...)
+
+\method{grid.draw}{ggsurvplot}(x, recording = TRUE)
 }
 \arguments{
+\item{x}{A survminer ggsurvplot object.}
+\item{recording}{Compatibility argument for grid.draw.}
 \item{group_var}{Grouping column name.}
 \item{df}{Data frame or matrix for correlation; data frame for survival.}
 \item{max_time}{Positive upper display limit; does not truncate observations used for fitting. NULL in plot_survival uses the maximum observed time.}
@@ -20,3 +25,5 @@ surv_fig_hr(group_var, df, max_time = 60, time = "OS",
 }
 \description{Compatibility interface for plot_survival, retaining the original text log and median-based display ordering. HRs are always labeled with their actual comparison direction.}
 \value{A survminer ggsurvplot object with statistics and survival_fit attributes, as in plot_survival.}
+
+\details{The registered grid.draw method uses standard print dispatch with newpage = FALSE, allowing ggplot2::ggsave to save the whole survival plot including its risk table. No global helper definition is needed.}

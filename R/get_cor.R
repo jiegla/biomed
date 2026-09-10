@@ -9,7 +9,7 @@
 #' @param subtype Optional grouping column for colors and group-specific regression lines.
 #' @param na.subtype.rm Drop missing group values before correlation calculation and plotting.
 #' @param color_subtype Optional group colors, optionally named.
-#' @param palette ggsci palette: jama, npg, aaas, nejm, lancet, jco or d3; used when group colors are not supplied.
+#' @param palette Built-in biomed (default), or a ggsci palette: jama, npg, aaas, nejm, lancet, jco or d3; used when group colors are not supplied.
 #' @param index Optional output filename prefix; defaults to 1.
 #' @param method Correlation method: spearman, pearson or kendall.
 #' @param show_cor_result Print the cor.test result.
@@ -50,7 +50,7 @@ get_cor <- function(
     subtype = NULL,
     na.subtype.rm = FALSE,
     color_subtype = NULL,
-    palette = "jama",
+    palette = "biomed",
     index = NULL,
     method = c("spearman", "pearson", "kendall"),
     show_cor_result = FALSE,
@@ -188,7 +188,9 @@ get_cor <- function(
     groups <- unique(as.character(data[[subtype]]))
     groups[is.na(groups)] <- "Not_available"
     n_colors <- length(groups)
-    if (palette %in% c("jama", "npg", "aaas", "nejm", "lancet", "jco", "d3")) {
+    if (identical(palette, "biomed")) {
+      color_subtype <- biomed_colors(n_colors)
+    } else if (palette %in% c("jama", "npg", "aaas", "nejm", "lancet", "jco", "d3")) {
       .biomed_require("ggsci")
       palette_fun <- getExportedValue("ggsci", paste0("pal_", palette))
       n_base <- switch(palette, jama = 7L, nejm = 8L, lancet = 9L, 10L)
