@@ -42,9 +42,9 @@ test_that("roc_batch uses the requested positive class", {
     response = factor(rep(c("No", "Yes"), each = 12)),
     marker = c(1:12, 20:31)
   )
-  out <- roc_batch(
+  expect_warning(out <- roc_batch(
     "marker", d, "response", positive_class = "Yes", direction = "<"
-  )
+  ), "AUC == 1")
   expect_equal(out$Positive, 12)
   expect_gt(out$AUC, 0.99)
   expect_true(is.na(out$Error))

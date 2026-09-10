@@ -41,11 +41,13 @@
 
 .biomed_as_numeric <- function(x, name) {
   if (is.numeric(x)) {
+    if (any(is.infinite(x))) cli::cli_abort("{.val {name}} contains infinite values.")
     return(as.numeric(x))
   }
 
   raw <- as.character(x)
   out <- suppressWarnings(as.numeric(raw))
+  if (any(is.infinite(out))) cli::cli_abort("{.val {name}} contains infinite values.")
   bad <- !is.na(raw) & nzchar(raw) & is.na(out)
 
   if (any(bad)) {
@@ -57,6 +59,37 @@
   }
 
   out
+}
+
+.biomed_validate_columns <- function(columns) {
+  if (!is.character(columns) || !length(columns) || anyNA(columns) ||
+      any(!nzchar(columns)) || anyDuplicated(columns)) {
+    cli::cli_abort("Columns must be a non-empty character vector of unique, non-missing names.")
+  }
+  invisible(columns)
+}
+
+.biomed_probability <- function(x, name) {
+  if (!is.numeric(x) || length(x) != 1L || !is.finite(x) || x <= 0 || x >= 1) {
+    cli::cli_abort("{.val {name}} must be a single number strictly between 0 and 1.")
+  }
+}
+
+.biomed_standard_table <- function(x, mapping) {
+  for (old in names(mapping)) {
+    names(x)[names(x) == old] <- unname(mapping[[old]])
+  }
+  rownames(x) <- NULL
+  x
+}
+
+.biomed_save_table <- function(x, output_dir, filename) {
+  if (!is.null(output_dir)) {
+    .biomed_require("openxlsx")
+    dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
+    openxlsx::write.xlsx(x, file.path(output_dir, filename), overwrite = TRUE)
+  }
+  x
 }
 
 .biomed_safe_name <- function(x) {

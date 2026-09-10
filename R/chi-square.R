@@ -1,7 +1,7 @@
 #' Batch association tests for categorical variables
 #'
 #' Uses Pearson's chi-squared test and automatically switches to Fisher's exact
-#' test for sparse 2-by-2 tables.
+#' test whenever any expected cell count is below five.
 #'
 #' @param pdata A data frame.
 #' @param variables Categorical columns to test.
@@ -19,6 +19,7 @@ chi_square_batch_df <- function(
     correct = FALSE) {
   test_method <- match.arg(test_method)
   pdata <- as.data.frame(pdata)
+  .biomed_validate_columns(variables)
   if (!is.character(variables) || !length(variables)) {
     cli::cli_abort("{.arg variables} must be a non-empty character vector.")
   }
@@ -40,7 +41,7 @@ chi_square_batch_df <- function(
 
     chi <- suppressWarnings(stats::chisq.test(tab, correct = correct))
     use_fisher <- test_method == "fisher" ||
-      (test_method == "auto" && all(dim(tab) == c(2L, 2L)) && any(chi$expected < 5))
+      (test_method == "auto" && any(chi$expected < 5))
     test <- tryCatch(
       if (use_fisher) stats::fisher.test(tab) else chi,
       error = identity

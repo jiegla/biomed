@@ -38,13 +38,14 @@ makegroup <- function(
     verbose = FALSE) {
   method <- match.arg(method)
   pdata <- as.data.frame(pdata)
+  .biomed_validate_columns(variables)
 
   if (!is.character(variables) || length(variables) == 0L) {
     cli::cli_abort("{.arg variables} must be a non-empty character vector.")
   }
   .biomed_required_columns(pdata, variables)
 
-  if (!num_group %in% c(2, 3)) {
+  if (length(num_group) != 1L || is.na(num_group) || !num_group %in% c(2, 3)) {
     cli::cli_abort("{.arg num_group} must be 2 or 3.")
   }
   if (num_group == 3 && method != "median") {
@@ -98,6 +99,9 @@ makegroup <- function(
       cli::cli_abort("{.arg response} must contain exactly two classes.")
     }
     positive <- if (is.null(positive_class)) levels_y[2L] else as.character(positive_class)
+    if (length(positive) != 1L || is.na(positive)) {
+      cli::cli_abort("{.arg positive_class} must identify exactly one class.")
+    }
     if (!positive %in% levels_y) {
       cli::cli_abort("{.arg positive_class} was not found in {.arg response}.")
     }
@@ -120,9 +124,14 @@ makegroup <- function(
     } else {
       target <- if (method == "fixed_sensitivity") "sensitivity" else "specificity"
       coord <- pROC::coords(
-        roc_obj, fixed_value, input = target,
+        roc_obj, "all",
         ret = c("threshold", "sensitivity", "specificity"), transpose = FALSE
       )
+      coord <- as.data.frame(coord)
+      coord <- coord[is.finite(coord$threshold) & coord[[target]] >= fixed_value, , drop = FALSE]
+      other <- if (target == "sensitivity") "specificity" else "sensitivity"
+      coord <- coord[order(-coord[[other]], -coord[[target]], coord$threshold), , drop = FALSE]
+      coord <- utils::head(coord, 1L)
     }
     coord <- as.data.frame(coord)
     thresholds <- as.numeric(coord$threshold)
@@ -131,10 +140,10 @@ makegroup <- function(
       cli::cli_abort("No finite ROC threshold was found for {.val {feature}}.")
     }
     list(
-      cutoff = stats::median(thresholds),
+      cutoff = thresholds[1L],
       auc = as.numeric(pROC::auc(roc_obj)),
-      sensitivity = mean(as.numeric(coord$sensitivity), na.rm = TRUE),
-      specificity = mean(as.numeric(coord$specificity), na.rm = TRUE)
+      sensitivity = as.numeric(pROC::coords(roc_obj, thresholds[1L], ret = "sensitivity", transpose = FALSE)[[1L]]),
+      specificity = as.numeric(pROC::coords(roc_obj, thresholds[1L], ret = "specificity", transpose = FALSE)[[1L]])
     )
   }
 
@@ -182,16 +191,17 @@ makegroup <- function(
       )
     } else {
       cutoffs <- stats::quantile(
-        pdata[[variable]], c(1 / 3, 2 / 3), na.rm = TRUE, names = FALSE
+        pdata[[variable]], c(0.33, 0.66), na.rm = TRUE, names = FALSE
       )
-      if (any(!is.finite(cutoffs)) || cutoffs[1L] >= cutoffs[2L]) {
-        cli::cli_warn("Tertile cutoffs for {.val {variable}} are not distinct; it was skipped.")
+      if (any(!is.finite(cutoffs))) {
+        cli::cli_warn("No finite tertile cutoffs for {.val {variable}}; it was skipped.")
         next
       }
       group_col <- paste0(variable, "_ternary")
-      pdata[[group_col]] <- cut(
-        pdata[[variable]], breaks = c(-Inf, cutoffs, Inf),
-        labels = c("Low", "Middle", "High"), include.lowest = TRUE
+      pdata[[group_col]] <- factor(
+        ifelse(pdata[[variable]] <= cutoffs[1L], "Low",
+               ifelse(pdata[[variable]] <= cutoffs[2L], "Middle", "High")),
+        levels = c("Low", "Middle", "High")
       )
       counts <- table(pdata[[group_col]])
       summaries[[variable]] <- data.frame(

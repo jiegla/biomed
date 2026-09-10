@@ -7,8 +7,8 @@
 #' @param target Grouping column.
 #' @param feature Numeric feature columns. If `NULL`, all numeric columns other
 #'   than `target` are used.
-#' @param feature_manipulation Retained for backward compatibility. Custom
-#'   feature manipulation should be performed before calling this function.
+#' @param feature_manipulation Remove incomplete, non-numeric, infinite and
+#'   constant features before testing.
 #'
 #' @return A data frame ordered by raw p-value.
 #' @export
@@ -24,20 +24,21 @@ batch_ANOVA <- function(
     cli::cli_abort("{.arg data} must be a data frame.")
   }
   .biomed_required_columns(data, target)
-  if (isTRUE(feature_manipulation)) {
-    cli::cli_warn(
-      "{.arg feature_manipulation} is deprecated; preprocess features before calling {.fn batch_ANOVA}."
-    )
-  }
 
   if (is.null(feature)) {
     feature <- setdiff(names(data)[vapply(data, is.numeric, logical(1))], target)
   }
+  .biomed_validate_columns(feature)
   .biomed_required_columns(data, feature)
   numeric_feature <- feature[vapply(data[feature], is.numeric, logical(1))]
+  if (isTRUE(feature_manipulation)) {
+    numeric_feature <- numeric_feature[vapply(data[numeric_feature], function(x) {
+      length(x) > 1L && all(is.finite(x)) && stats::sd(x) > 0
+    }, logical(1))]
+  }
   skipped <- setdiff(feature, numeric_feature)
   if (length(skipped)) {
-    cli::cli_warn("Non-numeric features were skipped: {skipped}.")
+    cli::cli_warn("Invalid or filtered features were skipped: {skipped}.")
   }
   if (!length(numeric_feature)) {
     cli::cli_abort("No numeric features are available for ANOVA.")
@@ -50,7 +51,7 @@ batch_ANOVA <- function(
 
   rows <- lapply(numeric_feature, function(feat) {
     dat <- data.frame(.value = data[[feat]], .group = group)
-    dat <- dat[stats::complete.cases(dat), , drop = FALSE]
+    dat <- dat[stats::complete.cases(dat) & is.finite(dat$.value), , drop = FALSE]
     dat$.group <- droplevels(dat$.group)
     if (nrow(dat) < 3L || nlevels(dat$.group) < 2L) {
       return(data.frame(
@@ -82,7 +83,7 @@ batch_ANOVA <- function(
     } else {
       base$mean_diff <- NA_real_
     }
-    cbind(base, mean_row, check.names = FALSE)
+    data.frame(base, mean_row, check.names = FALSE)
   })
 
   all_names <- unique(unlist(lapply(rows, names)))
