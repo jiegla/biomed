@@ -1,3 +1,17 @@
+# biomed 0.2.0
+
+* Added survival cutoff selection, screened batch Cox analysis, Kaplan-Meier
+  curves with risk tables, directed pairwise survival comparisons, correlation
+  plots, and portable filename sanitization.
+* Preserved best_cutoff_jgl, batch_surv_jgl, surv_fig_hr, get_cor_jgl and
+  sanitize_filename; added standardized snake_case interfaces.
+* Fixed reversed HR annotations, filtering after scaling/correlation, hidden
+  palette dependencies, and collisions with existing binary predictor columns.
+* Added explicit outcome encodings, failure reports, optional exports and
+  synthetic regression tests. Unknown outcome labels now fail explicitly.
+* The re-uploaded plot_roc_batch source was identical to the original upload;
+  retained the existing hardened ROC implementation.
+
 # biomed 0.1.0
 
 * Added standardized snake_case interfaces while retaining all nine original names.
