@@ -1,8 +1,8 @@
-\name{batch_surv_jgl}
-\alias{batch_surv_jgl}
+\name{batch_surv}
+\alias{batch_surv}
 \title{Legacy batch survival analysis}
 \usage{
-batch_surv_jgl(pdata, variable, time = "time", status = "status",
+batch_surv(pdata, variable, time = "time", status = "status",
                            best_cutoff = FALSE,
                            min_sample = 20,
                            min_event = 5,
@@ -17,7 +17,7 @@ batch_surv_jgl(pdata, variable, time = "time", status = "status",
 }
 \arguments{
 \item{pdata}{Data frame.}
-\item{variable}{Predictor column name for cutoff selection; a vector of predictor names for batch_surv_jgl.}
+\item{variable}{Predictor column name for cutoff selection; a vector of predictor names for batch_surv.}
 \item{time}{Follow-up time column, containing nonnegative numeric values.}
 \item{status}{Outcome column.}
 \item{best_cutoff}{Optimize and dichotomize each numeric predictor before fitting Cox models.}

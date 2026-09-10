@@ -37,10 +37,10 @@
 #' @param point.shape Ungrouped point shape.
 #' @param stroke Ungrouped point outline width.
 #' @param add.regress Add linear regression line(s) with confidence bands, regardless of correlation method; grouped plots fit a line within each group.
-#' @param save_data Also export analyzed plot data as RData. Legacy get_cor_jgl defaults to TRUE when saving a plot; plot_correlation defaults to FALSE.
+#' @param save_data Also export analyzed plot data as RData. Legacy get_cor defaults to TRUE when saving a plot; plot_correlation defaults to FALSE.
 #' @return A ggplot invisibly, with a correlation attribute containing x, y, method, n, estimate and p_value. Insufficient or constant data warns and returns NULL. NULL df returns NULL.
 #' @export
-get_cor_jgl <- function(
+get_cor <- function(
     df = NULL,
     var1,
     var2,
@@ -222,7 +222,7 @@ get_cor_jgl <- function(
 
   if (!is.null(subtype)) {
 
-    group_col <- .tmp_name_jgl(".biomed_group", names(data))
+    group_col <- .biomed_unique_name(".biomed_group", names(data))
     data[[group_col]] <- data[[subtype]]
 
     if (na.subtype.rm) {

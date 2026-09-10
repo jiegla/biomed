@@ -1,8 +1,8 @@
-\name{get_cor_jgl}
-\alias{get_cor_jgl}
+\name{get_cor}
+\alias{get_cor}
 \title{Legacy correlation plot}
 \usage{
-get_cor_jgl(
+get_cor(
     df = NULL,
     var1,
     var2,
@@ -83,7 +83,7 @@ get_cor_jgl(
 \item{point.shape}{Ungrouped point shape.}
 \item{stroke}{Ungrouped point outline width.}
 \item{add.regress}{Add linear regression line(s) with confidence bands, regardless of correlation method; grouped plots fit a line within each group.}
-\item{save_data}{Also export analyzed plot data as RData. Legacy get_cor_jgl defaults to TRUE when saving a plot; plot_correlation defaults to FALSE.}
+\item{save_data}{Also export analyzed plot data as RData. Legacy get_cor defaults to TRUE when saving a plot; plot_correlation defaults to FALSE.}
 }
 \description{Compute correlation and plot the same filtered observations. Original zero values and missing groups are filtered before scaling and testing. Prefer plot_correlation for standardized names.}
 \value{A ggplot invisibly, with a correlation attribute containing x, y, method, n, estimate and p_value. Insufficient or constant data warns and returns NULL. NULL df returns NULL.}

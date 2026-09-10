@@ -1,10 +1,10 @@
-test_that("batch_ANOVA returns group means and adjusted p-values", {
+test_that("anova_batch returns group means and adjusted p-values", {
   d <- data.frame(
     arm = factor(rep(c("A", "B"), each = 6)),
     signal = c(1:6, 10:15),
     noise = rep(c(1, 2), 6)
   )
-  out <- batch_ANOVA(d, target = "arm", feature = c("signal", "noise"))
+  out <- anova_batch(d, target = "arm", feature = c("signal", "noise"))
   expect_equal(sort(out$sig_names), c("noise", "signal"))
   expect_true(all(c("p.adj", "mean_A", "mean_B") %in% names(out)))
   expect_lt(out$p.value[out$sig_names == "signal"], 0.001)
@@ -21,14 +21,14 @@ test_that("categorical tests switch to Fisher for sparse 2 by 2 tables", {
   expect_true("P_Adjust" %in% names(out))
 })
 
-test_that("cophx_batch retains every contrast for a multilevel factor", {
+test_that("cox_batch retains every contrast for a multilevel factor", {
   d <- data.frame(
     time = 1:18,
     status = rep(c(1, 0, 1), 6),
     subtype = factor(rep(c("A", "B", "C"), 6)),
     marker = seq(0.1, 1.8, by = 0.1)
   )
-  out <- suppressWarnings(cophx_batch(
+  out <- suppressWarnings(cox_batch(
     c("subtype", "marker"), d, time = "time", status = "status"
   ))
   expect_equal(sum(out$Marker == "subtype"), 2)

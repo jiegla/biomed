@@ -22,7 +22,7 @@
 #' @return Invisibly, a list containing the grob, partition table, and output
 #'   paths.
 #' @export
-vennjgl <- function(
+venn_plot <- function(
     list,
     venn_name = "test",
     col = NULL,
@@ -139,49 +139,4 @@ vennjgl <- function(
     venn_plot = venn_plot, partition = partition,
     image_files = image_files, excel_file = excel_file
   ))
-}
-
-.biomed_partitions <- function(sets) {
-  universe <- unique(unlist(sets, use.names = FALSE))
-  masks <- as.matrix(expand.grid(rep(base::list(c(FALSE, TRUE)), length(sets))))
-  masks <- masks[rowSums(masks) > 0L, , drop = FALSE]
-  result <- as.data.frame(masks)
-  names(result) <- names(sets)
-  members <- lapply(seq_len(nrow(masks)), function(i) {
-    keep <- rep(TRUE, length(universe))
-    for (j in seq_along(sets)) {
-      keep <- keep & ((universe %in% sets[[j]]) == masks[i, j])
-    }
-    universe[keep]
-  })
-  result$set <- apply(masks, 1L, function(x) paste(names(sets)[x], collapse = " & "))
-  result$count <- lengths(members)
-  result$values <- vapply(members, paste, collapse = ", ", FUN.VALUE = character(1))
-  result
-}
-
-# VennDiagram supports at most five sets. Six sets use an exact membership
-# matrix, avoiding a misleading arrangement of overlapping circles.
-.biomed_intersection_matrix <- function(sets, colors, title, cex) {
-  universe <- unique(unlist(sets, use.names = FALSE))
-  if (!length(universe)) cli::cli_abort("The sets contain no members.")
-  membership <- vapply(sets, function(x) universe %in% x, logical(length(universe)))
-  if (is.null(dim(membership))) membership <- matrix(membership, nrow = length(universe))
-  keys <- apply(membership, 1L, paste0, collapse = "")
-  counts <- sort(table(keys), decreasing = TRUE)
-  rows <- match(names(counts), keys)
-  m <- membership[rows, , drop = FALSE]
-  d <- expand.grid(intersection = seq_len(nrow(m)), set = seq_len(ncol(m)))
-  d$present <- as.vector(m)
-  d$set_name <- factor(names(sets)[d$set], levels = rev(names(sets)))
-  d$fill <- ifelse(d$present, colors[d$set], "grey92")
-  p <- ggplot2::ggplot(d, ggplot2::aes(x = .data[["intersection"]], y = .data[["set_name"]])) +
-    ggplot2::geom_tile(ggplot2::aes(fill = .data[["fill"]]), width = 0.8, height = 0.8) +
-    ggplot2::scale_fill_identity() +
-    ggplot2::scale_x_continuous(breaks = seq_along(counts), labels = as.integer(counts)) +
-    ggplot2::labs(title = title, subtitle = "Exact intersections (six sets)",
-                  x = "Number of members in each intersection", y = NULL) +
-    ggplot2::theme_minimal(base_size = 10 * cex) +
-    ggplot2::theme(panel.grid = ggplot2::element_blank())
-  ggplot2::ggplotGrob(p)
 }

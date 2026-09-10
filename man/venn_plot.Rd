@@ -1,8 +1,8 @@
-\name{vennjgl}
-\alias{vennjgl}
+\name{venn_plot}
+\alias{venn_plot}
 \title{Draw a Venn diagram and extract partitions}
 \usage{
-vennjgl(list, venn_name = "test", col = NULL,
+venn_plot(list, venn_name = "test", col = NULL,
   palette = c("npg", "aaas", "nejm", "lancet", "jama"),
   fill_col = NULL, cat.col = NULL, showFigure = TRUE,
   file_type = c("tif", "png", "pdf"), width = 6, height = 5,
@@ -30,7 +30,7 @@ vennjgl(list, venn_name = "test", col = NULL,
 membership matrix for six sets, with an auditable table of set partitions.}
 \examples{
 if (requireNamespace("VennDiagram", quietly = TRUE)) {
-  vennjgl(list(A = letters[1:4], B = letters[3:6]),
+  venn_plot(list(A = letters[1:4], B = letters[3:6]),
     showFigure = FALSE, save = FALSE, write_xlsx = FALSE)
 }
 }

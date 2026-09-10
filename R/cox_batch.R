@@ -11,7 +11,7 @@
 #'
 #' @return A data frame with hazard ratios, confidence intervals and p-values.
 #' @export
-cophx_batch <- function(
+cox_batch <- function(
     var,
     pdata,
     time = "PFS",

@@ -13,6 +13,28 @@ publication-ready tables and figures.
 > `biomed` is for research use only. It is not medical advice and is not a
 > validated clinical decision-support system.
 
+## Function naming (0.3.0)
+
+Public functions each have a matching `R/function_name.R` file. Shared internal
+helpers remain in `R/internal_utils.R`; package documentation remains in
+`R/biomed-package.R`. Existing standardized interfaces such as `batch_anova`,
+`batch_survival`, `plot_survival` and `plot_correlation` keep their names.
+
+The following functions were renamed without changing their arguments or
+calculations. Update old scripts using this table; the old exports are removed.
+
+| Previous name | New name |
+| --- | --- |
+| `best_cutoff_jgl()` | `best_cutoff()` |
+| `batch_surv_jgl()` | `batch_surv()` |
+| `get_cor_jgl()` | `get_cor()` |
+| `vennjgl()` | `venn_plot()` |
+| `batch_ANOVA()` | `anova_batch()` |
+| `donutPie()` | `donut_pie()` |
+| `cophx_batch()` | `cox_batch()` |
+
+`anova_batch.R` and `batch_anova.R` now also work on case-insensitive file systems.
+
 ## Design principles
 
 - Reproducible analyses with explicit inputs, endpoints, and assumptions.
@@ -37,14 +59,14 @@ exported and retain their result column names.
 | Original name | Standard name |
 |---|---|
 | `makegroup()` | `make_group()` |
-| `batch_ANOVA()` | `batch_anova()` |
+| `anova_batch()` | `batch_anova()` |
 | `chi_square_batch_df()` | `batch_chi_square()` |
-| `cophx_batch()` | `batch_cox()` |
+| `cox_batch()` | `batch_cox()` |
 | `roc_batch()` | `batch_roc()` |
 | `plot_roc_batch()` | `plot_roc()` |
-| `donutPie()` | `plot_donut()` |
+| `donut_pie()` | `plot_donut()` |
 | `draw_stack_barplot()` | `plot_stacked_bar()` |
-| `vennjgl()` | `plot_venn()` |
+| `venn_plot()` | `plot_venn()` |
 
 The new interfaces consistently use `data`, `variables`, `output_dir`,
 `colors` and `remove_na` where applicable. Analysis tables use
@@ -102,14 +124,14 @@ plot_stacked_bar(d, variables = "response", group = "group")
 | Function | Purpose |
 |---|---|
 | `makegroup()` | Reproducible median, survival, or ROC-derived cutoffs |
-| `batch_ANOVA()` | Batch one-way ANOVA with BH-adjusted p-values |
+| `anova_batch()` | Batch one-way ANOVA with BH-adjusted p-values |
 | `chi_square_batch_df()` | Batch chi-square/Fisher association tests |
-| `cophx_batch()` | Batch univariable Cox regression |
+| `cox_batch()` | Batch univariable Cox regression |
 | `roc_batch()` | Batch ROC metrics and confidence intervals |
 | `plot_roc_batch()` | ROC figures returned as reusable ggplot objects |
-| `donutPie()` | Donut charts for categorical variables |
+| `donut_pie()` | Donut charts for categorical variables |
 | `draw_stack_barplot()` | Proportional stacked bars with association tests |
-| `vennjgl()` | Venn diagrams and intersection-member tables |
+| `venn_plot()` | Venn diagrams and intersection-member tables |
 
 ## Quick start
 
@@ -129,7 +151,7 @@ analysis_data <- data.frame(
 )
 
 grouped <- makegroup(analysis_data, "biomarker", method = "median")
-donutPie(grouped, "biomarker_binary")
+donut_pie(grouped, "biomarker_binary")
 ```
 
 ROC, maximally selected survival cutoffs, Venn diagrams, and XLSX output use
@@ -141,11 +163,11 @@ use synthetic data only.
 
 | Original function | Standard interface | Main purpose |
 | --- | --- | --- |
-| `best_cutoff_jgl()` | `find_survival_cutoff()` | Survival cutoff with valid-group checks and median fallback |
-| `batch_surv_jgl()` | `batch_survival()` | Batch Cox models, eligibility thresholds, failures and FDR |
+| `best_cutoff()` | `find_survival_cutoff()` | Survival cutoff with valid-group checks and median fallback |
+| `batch_surv()` | `batch_survival()` | Batch Cox models, eligibility thresholds, failures and FDR |
 | `surv_fig_hr()` | `plot_survival()` | Kaplan-Meier curves, risk table, medians and directed HR |
 | Internal pairwise helper | `pairwise_survival()` | Named pairwise HRs and log-rank tests |
-| `get_cor_jgl()` | `plot_correlation()` | Correlation statistics, scatter plots, labels and exports |
+| `get_cor()` | `plot_correlation()` | Correlation statistics, scatter plots, labels and exports |
 | `sanitize_filename()` | `sanitize_filename()` | Safe output file names without a pipe dependency |
 
 The new survival interfaces default to **0 = censored, 1 = event**. Specify
@@ -184,7 +206,7 @@ print(p)
 `plot_survival()` exports the curve **and risk table** together as PDF/PNG plus
 a statistics text file. New interfaces write nothing unless `output_dir` is
 provided. Legacy `surv_fig_hr()` retains its `Surv_Output` text log; disable it
-with `output_dir = NULL`. Legacy `get_cor_jgl(save_plot = TRUE, path = ...)`
+with `output_dir = NULL`. Legacy `get_cor(save_plot = TRUE, path = ...)`
 retains the analyzed-data RData export; disable it with `save_data = FALSE`.
 The new `plot_correlation()` requires `save_data = TRUE` to export data.
 

@@ -1,8 +1,8 @@
-\name{best_cutoff_jgl}
-\alias{best_cutoff_jgl}
+\name{best_cutoff}
+\alias{best_cutoff}
 \title{Legacy survival cutoff selection}
 \usage{
-best_cutoff_jgl(pdata, variable, time = "time",
+best_cutoff(pdata, variable, time = "time",
                             status = "status", print_result = TRUE,
                             minprop = 0.1,
                             fallback_cutoff = c("none", "median"),
@@ -10,7 +10,7 @@ best_cutoff_jgl(pdata, variable, time = "time",
 }
 \arguments{
 \item{pdata}{Data frame.}
-\item{variable}{Predictor column name for cutoff selection; a vector of predictor names for batch_surv_jgl.}
+\item{variable}{Predictor column name for cutoff selection; a vector of predictor names for batch_surv.}
 \item{time}{Follow-up time column, containing nonnegative numeric values.}
 \item{status}{Outcome column.}
 \item{print_result}{Print the selected cutoff.}
