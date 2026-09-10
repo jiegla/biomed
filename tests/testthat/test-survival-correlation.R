@@ -15,13 +15,13 @@ test_that("file names are portable and missing values stay missing", {
 })
 
 test_that("status conversion is explicit and never silently loses unknown labels", {
-  expect_equal(biomed:::.status01_jgl(c("alive", "dead", NA), "labels"), c(0, 1, NA))
-  expect_equal(biomed:::.status01_jgl(c(1, 1), "12"), c(0, 0))
-  expect_equal(biomed:::.status01_jgl(c(1, 1), "01"), c(1, 1))
-  expect_equal(biomed:::.status01_jgl(factor(c("1", "2")), "auto"), c(0, 1))
-  expect_error(biomed:::.status01_jgl(c("alive", "unknown")), "Unrecognized")
-  expect_error(biomed:::.status01_jgl(c(0, 2), "01"), "encoding")
-  expect_equal(biomed:::.status01_jgl(c(TRUE, FALSE, NA), "01"), c(1, 0, NA))
+  expect_equal(biomed:::.biomed_status01(c("alive", "dead", NA), "labels"), c(0, 1, NA))
+  expect_equal(biomed:::.biomed_status01(c(1, 1), "12"), c(0, 0))
+  expect_equal(biomed:::.biomed_status01(c(1, 1), "01"), c(1, 1))
+  expect_equal(biomed:::.biomed_status01(factor(c("1", "2")), "auto"), c(0, 1))
+  expect_error(biomed:::.biomed_status01(c("alive", "unknown")), "Unrecognized")
+  expect_error(biomed:::.biomed_status01(c(0, 2), "01"), "encoding")
+  expect_equal(biomed:::.biomed_status01(c(TRUE, FALSE, NA), "01"), c(1, 0, NA))
 })
 
 test_that("batch survival retains all contrasts and reports failures", {
@@ -32,7 +32,7 @@ test_that("batch survival retains all contrasts and reports failures", {
   fit <- survival::coxph(survival::Surv(time, status) ~ marker, data = d)
   expect_equal(out$results$hr[out$results$variable == "marker"], unname(exp(stats::coef(fit))))
   expect_equal(out$results$p_adjusted, stats::p.adjust(out$results$p_value, "BH"))
-  legacy <- batch_surv_jgl(d, c("marker", "group"), verbose = FALSE)
+  legacy <- batch_surv(d, c("marker", "group"), verbose = FALSE)
   expect_equal(legacy$HR, out$results$hr)
   expect_s3_class(attr(legacy, "failed"), "data.frame")
   d$status <- d$status + 1

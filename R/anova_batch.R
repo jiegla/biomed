@@ -12,7 +12,7 @@
 #'
 #' @return A data frame ordered by raw p-value.
 #' @export
-batch_ANOVA <- function(
+anova_batch <- function(
     data,
     target = "group",
     feature = NULL,

@@ -1,8 +1,8 @@
 \name{analysis_utilities}
 \alias{makegroup}
-\alias{batch_ANOVA}
+\alias{anova_batch}
 \alias{chi_square_batch_df}
-\alias{cophx_batch}
+\alias{cox_batch}
 \alias{roc_batch}
 \alias{plot_roc_batch}
 \title{Clinical and biomarker analysis utilities}
@@ -14,13 +14,13 @@ makegroup(pdata, variables, num_group = 2,
   positive_class = NULL, direction = "auto",
   add_method_suffix = FALSE, verbose = FALSE)
 
-batch_ANOVA(data, target = "group", feature = NULL,
+anova_batch(data, target = "group", feature = NULL,
   feature_manipulation = FALSE)
 
 chi_square_batch_df(pdata, variables, response = "status",
   test_method = c("auto", "chi_square", "fisher"), correct = FALSE)
 
-cophx_batch(var, pdata, time = "PFS", status = "PFS_status",
+cox_batch(var, pdata, time = "PFS", status = "PFS_status",
   conf_level = 0.95)
 
 roc_batch(vars, pdata, outcome, method = c("best", "median"),
@@ -71,7 +71,7 @@ d <- data.frame(
   time = seq_len(10)
 )
 makegroup(d, "marker")
-batch_ANOVA(d, target = "group", feature = "marker")
+anova_batch(d, target = "group", feature = "marker")
 chi_square_batch_df(d, "group", response = "status")
-cophx_batch("marker", d, time = "time", status = "status")
+cox_batch("marker", d, time = "time", status = "status")
 }

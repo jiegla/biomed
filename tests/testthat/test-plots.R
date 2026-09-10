@@ -1,6 +1,6 @@
-test_that("donutPie returns named ggplot objects", {
+test_that("donut_pie returns named ggplot objects", {
   d <- data.frame(response = factor(c("CR", "PR", "PR", NA)))
-  plots <- donutPie(d, "response", removeNA = FALSE)
+  plots <- donut_pie(d, "response", removeNA = FALSE)
   expect_named(plots, "response")
   expect_s3_class(plots$response, "ggplot")
 })
@@ -32,9 +32,9 @@ test_that("plot_roc_batch returns plots and writes nothing when path is null", {
   expect_s3_class(plots$marker, "ggplot")
 })
 
-test_that("vennjgl returns exact intersection members without writing", {
+test_that("venn_plot returns exact intersection members without writing", {
   skip_if_not_installed("VennDiagram")
-  result <- vennjgl(
+  result <- venn_plot(
     list(A = c("x", "y"), B = c("y", "z")), showFigure = FALSE,
     save = FALSE, write_xlsx = FALSE
   )

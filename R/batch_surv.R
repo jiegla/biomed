@@ -1,317 +1,8 @@
-.num_jgl <- function(x) {
-  if (is.factor(x)) x <- as.character(x)
-  suppressWarnings(as.numeric(x))
-}
-
-.status01_jgl <- function(x, encoding = "auto") {
-  encoding <- match.arg(encoding, c("auto", "01", "12", "labels"))
-  if (is.logical(x) && encoding %in% c("01", "auto", "labels")) return(as.numeric(x))
-  raw <- trimws(tolower(as.character(x)))
-  numeric_x <- suppressWarnings(as.numeric(raw))
-  present <- !is.na(x)
-  if (encoding %in% c("01", "12")) {
-    allowed <- if (encoding == "01") c(0, 1) else c(1, 2)
-    if (any(present & (is.na(numeric_x) | !numeric_x %in% allowed))) {
-      stop("Status must use the selected ", encoding, " encoding.")
-    }
-    return(if (encoding == "12") numeric_x - 1 else numeric_x)
-  }
-  if (encoding == "auto" && all(!present | !is.na(numeric_x))) {
-    observed <- unique(numeric_x[present])
-    if (all(observed %in% c(0, 1))) return(numeric_x)
-    if (all(observed %in% c(1, 2))) return(numeric_x - 1)
-    stop("Unsupported numeric status; use 0/1 or 1/2.")
-  }
-  events <- c("1", "true", "t", "yes", "y", "event", "dead", "death",
-              "deceased", "progression", "progressed", "pd", "relapse",
-              "recurred", "recurrence")
-  censored <- c("0", "false", "f", "no", "n", "censored", "alive", "living",
-                "no event", "noevent", "non-event", "non event", "no progression")
-  out <- rep(NA_real_, length(x))
-  out[raw %in% events] <- 1
-  out[raw %in% censored] <- 0
-  if (any(present & is.na(out))) stop("Unrecognized status labels.")
-  out
-}
-
-.biomed_survival_options <- function(minprop, counts = numeric()) {
-  if (length(minprop) != 1L || !is.numeric(minprop) || !is.finite(minprop) ||
-      minprop <= 0 || minprop > 0.5) stop("minprop must be in (0, 0.5].")
-  if (anyNA(counts) || any(!is.finite(counts)) || any(counts < 0) ||
-      any(counts != floor(counts))) stop("Sample/event thresholds must be nonnegative integers.")
-}
-
-.valid_cutoffs_jgl <- function(x, minprop = 0.1) {
-  x <- x[!is.na(x)]
-  n <- length(x)
-
-  if (n == 0) return(numeric(0))
-
-  ux <- sort(unique(x))
-
-  if (length(ux) < 2) return(numeric(0))
-
-  cuts <- ux[-length(ux)]
-  min_n <- ceiling(n * minprop)
-
-  cuts[vapply(
-    cuts,
-    function(cut) {
-      n_low <- sum(x <= cut, na.rm = TRUE)
-      n_high <- sum(x > cut, na.rm = TRUE)
-      n_low >= min_n && n_high >= min_n
-    },
-    logical(1)
-  )]
-}
-
-.extract_cox_jgl <- function(fit) {
-  s <- summary(fit)
-
-  co <- as.data.frame(s$coefficients, check.names = FALSE)
-  ci <- as.data.frame(s$conf.int, check.names = FALSE)
-
-  low_col <- grep("lower", colnames(ci), value = TRUE)[1]
-  high_col <- grep("upper", colnames(ci), value = TRUE)[1]
-  p_col <- grep("^Pr", colnames(co), value = TRUE)[1]
-
-  data.frame(
-    term = rownames(co),
-    HR = ci[["exp(coef)"]],
-    lower95 = ci[[low_col]],
-    upper95 = ci[[high_col]],
-    P = co[[p_col]],
-    stringsAsFactors = FALSE,
-    row.names = NULL
-  )
-}
-
-.add_fail_jgl <- function(fail_df, ID, stage, reason) {
-  rbind(
-    fail_df,
-    data.frame(
-      ID = as.character(ID),
-      stage = as.character(stage),
-      reason = as.character(reason),
-      stringsAsFactors = FALSE
-    )
-  )
-}
-
-.tmp_name_jgl <- function(base, nms) {
-  nm <- base
-  while (nm %in% nms) {
-    nm <- paste0(".", nm)
-  }
-  nm
-}
-
-#' Legacy survival cutoff selection
-#'
-#' Find a maximally selected survival cutoff, with optional fallback to a valid observed value nearest the median. Prefer find_survival_cutoff for a standardized interface.
-#' @param pdata Data frame.
-#' @param variable Predictor column name for cutoff selection; a vector of predictor names for batch_surv_jgl.
-#' @param time Follow-up time column, containing nonnegative numeric values.
-#' @param status Outcome column.
-#' @param print_result Print the selected cutoff.
-#' @param minprop Minimum fraction per cutoff group, in (0, 0.5].
-#' @param fallback_cutoff One of "none" or "median". Median fallback selects the valid observed cutoff closest to the median only when optimized selection fails.
-#' @param status_encoding One of "01" (0 censored, 1 event), "12" (1 censored, 2 event), "labels", or "auto". Auto tries 0/1 first: an all-1 cohort is treated as all events. Select "12" explicitly for an all-censored 1/2-coded cohort. Labels include alive/dead, censored/event, false/true, no/yes and progression/recurrence terms. Unknown nonmissing labels cause an error.
-#' @return A list with pdata, best_cutoff, cutoff_method, reason and, on success, group_column. Clean complete observations are returned. Low includes values equal to the cutoff. Existing columns are preserved by choosing a unique group column name.
-#' @export
-best_cutoff_jgl <- function(pdata, variable, time = "time",
-                            status = "status", print_result = TRUE,
-                            minprop = 0.1,
-                            fallback_cutoff = c("none", "median"),
-                            status_encoding = "auto") {
-
-  fallback_cutoff <- match.arg(fallback_cutoff)
-  .biomed_survival_options(minprop)
-
-  if (!is.data.frame(pdata)) {
-    stop("pdata must be a data frame.")
-  }
-
-  if (!variable %in% colnames(pdata)) {
-    stop(paste0("Variable not found in pdata: ", variable))
-  }
-
-  if (!time %in% colnames(pdata)) {
-    stop(paste0("Time column not found in pdata: ", time))
-  }
-
-  if (!status %in% colnames(pdata)) {
-    stop(paste0("Status column not found in pdata: ", status))
-  }
-
-  pdata <- as.data.frame(pdata)
-
-  time_tmp <- .tmp_name_jgl("..time_cut_jgl..", colnames(pdata))
-  status_tmp <- .tmp_name_jgl("..status_cut_jgl..", c(colnames(pdata), time_tmp))
-  x_tmp <- .tmp_name_jgl("..x_cut_jgl..", c(colnames(pdata), time_tmp, status_tmp))
-
-  pdata[[time_tmp]] <- .biomed_as_numeric(pdata[[time]], time)
-  if (any(pdata[[time_tmp]] < 0, na.rm = TRUE)) stop("Time must be nonnegative.")
-  pdata[[status_tmp]] <- .status01_jgl(pdata[[status]], status_encoding)
-  pdata[[x_tmp]] <- .num_jgl(pdata[[variable]])
-
-  pdata <- pdata[
-    !is.na(pdata[[time_tmp]]) &
-      is.finite(pdata[[time_tmp]]) &
-      !is.na(pdata[[status_tmp]]) &
-      pdata[[status_tmp]] %in% c(0, 1) &
-      !is.na(pdata[[x_tmp]]) &
-      is.finite(pdata[[x_tmp]]),
-    ,
-    drop = FALSE
-  ]
-
-  clean_return <- function(df) {
-    df[[time_tmp]] <- NULL
-    df[[status_tmp]] <- NULL
-    df[[x_tmp]] <- NULL
-    df
-  }
-
-  fail_return <- function(reason) {
-    list(
-      pdata = clean_return(pdata),
-      best_cutoff = NA_real_,
-      cutoff_method = NA_character_,
-      reason = reason
-    )
-  }
-
-  if (nrow(pdata) == 0) {
-    return(fail_return("no complete data"))
-  }
-
-  if (sum(pdata[[status_tmp]] == 1, na.rm = TRUE) == 0) {
-    return(fail_return("no event"))
-  }
-
-  if (sum(pdata[[status_tmp]] == 0, na.rm = TRUE) == 0) {
-    return(fail_return("no censored sample"))
-  }
-
-  if (length(unique(stats::na.omit(pdata[[x_tmp]]))) < 3 &&
-      fallback_cutoff == "none") {
-    return(fail_return("less than 3 unique expression values"))
-  }
-
-  valid_cutoffs <- .valid_cutoffs_jgl(pdata[[x_tmp]], minprop = minprop)
-
-  if (length(valid_cutoffs) == 0) {
-    return(fail_return("no cutoff satisfies minprop"))
-  }
-
-  cutoff_value <- NA_real_
-  cutoff_method <- NA_character_
-  cutoff_error <- NA_character_
-
-  if (requireNamespace("survminer", quietly = TRUE)) {
-
-    dat_cut <- data.frame(
-      time_iobr = pdata[[time_tmp]],
-      status_iobr = pdata[[status_tmp]],
-      x_iobr = pdata[[x_tmp]]
-    )
-
-    iscutoff <- tryCatch(
-      {
-        survminer::surv_cutpoint(
-          dat_cut,
-          time = "time_iobr",
-          event = "status_iobr",
-          variables = "x_iobr",
-          minprop = minprop
-        )
-      },
-      error = function(e) {
-        cutoff_error <<- conditionMessage(e)
-        return(NULL)
-      }
-    )
-
-    if (!is.null(iscutoff)) {
-      cutoff_value <- suppressWarnings(
-        as.numeric(iscutoff$cutpoint$cutpoint[1])
-      )
-
-      if (length(cutoff_value) != 1 ||
-          is.na(cutoff_value) ||
-          !is.finite(cutoff_value)) {
-        cutoff_value <- NA_real_
-      } else {
-        n_low <- sum(pdata[[x_tmp]] <= cutoff_value, na.rm = TRUE)
-        n_high <- sum(pdata[[x_tmp]] > cutoff_value, na.rm = TRUE)
-        min_n <- ceiling(nrow(pdata) * minprop)
-
-        if (n_low < min_n || n_high < min_n) {
-          cutoff_value <- NA_real_
-          cutoff_error <- "surv_cutpoint returned invalid grouping"
-        } else {
-          cutoff_method <- "surv_cutpoint"
-        }
-      }
-    }
-  } else {
-    cutoff_error <- "package survminer is not installed"
-  }
-
-  if ((is.na(cutoff_value) || !is.finite(cutoff_value)) &&
-      fallback_cutoff == "median") {
-
-    med <- stats::median(pdata[[x_tmp]], na.rm = TRUE)
-    cutoff_value <- valid_cutoffs[which.min(abs(valid_cutoffs - med))]
-    cutoff_method <- "median_valid"
-  }
-
-  if (is.na(cutoff_value) || !is.finite(cutoff_value)) {
-    return(fail_return(
-      paste0("cutoff failed", ifelse(is.na(cutoff_error), "", paste0(": ", cutoff_error)))
-    ))
-  }
-
-  variable2 <- .tmp_name_jgl(paste0(variable, "_binary"), names(pdata))
-
-  pdata[[variable2]] <- ifelse(
-    pdata[[x_tmp]] <= cutoff_value,
-    "Low",
-    "High"
-  )
-
-  pdata[[variable2]] <- factor(
-    pdata[[variable2]],
-    levels = c("Low", "High")
-  )
-
-  if (print_result) {
-    message(
-      "Best cutoff for ",
-      variable,
-      ": ",
-      round(cutoff_value, 3),
-      " [",
-      cutoff_method,
-      "]"
-    )
-  }
-
-  list(
-    pdata = clean_return(pdata),
-    best_cutoff = cutoff_value,
-    cutoff_method = cutoff_method,
-    group_column = variable2,
-    reason = NA_character_
-  )
-}
-
 #' Legacy batch survival analysis
 #'
 #' Fit univariable Cox models with eligibility thresholds, optional cutoff selection, multiple-testing adjustment and detailed failure reporting. Prefer batch_survival for standardized names.
 #' @param pdata Data frame.
-#' @param variable Predictor column name for cutoff selection; a vector of predictor names for batch_surv_jgl.
+#' @param variable Predictor column name for cutoff selection; a vector of predictor names for batch_surv.
 #' @param time Follow-up time column, containing nonnegative numeric values.
 #' @param status Outcome column.
 #' @param best_cutoff Optimize and dichotomize each numeric predictor before fitting Cox models.
@@ -328,7 +19,7 @@ best_cutoff_jgl <- function(pdata, variable, time = "time",
 #' @param status_encoding One of "01" (0 censored, 1 event), "12" (1 censored, 2 event), "labels", or "auto". Auto tries 0/1 first: an all-1 cohort is treated as all events. Select "12" explicitly for an all-censored 1/2-coded cohort. Labels include alive/dead, censored/event, false/true, no/yes and progression/recurrence terms. Unknown nonmissing labels cause an error.
 #' @return A tibble with ID, cox_variable, term, HR, lower95, upper95, P, N, Event, Censored, warning and optional FDR/cutoff summaries. Multiple factor contrasts are retained. Failures are available as attributes or list elements with return_failed = TRUE.
 #' @export
-batch_surv_jgl <- function(pdata, variable, time = "time", status = "status",
+batch_surv <- function(pdata, variable, time = "time", status = "status",
                            best_cutoff = FALSE,
                            min_sample = 20,
                            min_event = 5,
@@ -403,7 +94,7 @@ batch_surv_jgl <- function(pdata, variable, time = "time", status = "status",
 
   if (length(missing_var) > 0) {
     for (v in missing_var) {
-      fail_df <- .add_fail_jgl(
+      fail_df <- .biomed_add_failure(
         fail_df,
         ID = v,
         stage = "input",
@@ -419,14 +110,14 @@ batch_surv_jgl <- function(pdata, variable, time = "time", status = "status",
     return(make_output(tibble::tibble(), fail_df, cutoff_df))
   }
 
-  row_col <- .tmp_name_jgl("..row_id_jgl..", colnames(pdata))
-  time_col <- .tmp_name_jgl("..time_jgl..", c(colnames(pdata), row_col))
-  status_col <- .tmp_name_jgl("..status_jgl..", c(colnames(pdata), row_col, time_col))
+  row_col <- .biomed_unique_name("..row_id_biomed..", colnames(pdata))
+  time_col <- .biomed_unique_name("..time_biomed..", c(colnames(pdata), row_col))
+  status_col <- .biomed_unique_name("..status_biomed..", c(colnames(pdata), row_col, time_col))
 
   pdata[[row_col]] <- seq_len(nrow(pdata))
   pdata[[time_col]] <- .biomed_as_numeric(pdata[[time]], time)
   if (any(pdata[[time_col]] < 0, na.rm = TRUE)) stop("Time must be nonnegative.")
-  pdata[[status_col]] <- .status01_jgl(pdata[[status]], status_encoding)
+  pdata[[status_col]] <- .biomed_status01(pdata[[status]], status_encoding)
 
   pdata <- pdata[
     !is.na(pdata[[time_col]]) &
@@ -438,7 +129,7 @@ batch_surv_jgl <- function(pdata, variable, time = "time", status = "status",
   ]
 
   if (nrow(pdata) < min_sample) {
-    fail_df <- .add_fail_jgl(
+    fail_df <- .biomed_add_failure(
       fail_df,
       ID = "ALL",
       stage = "input",
@@ -448,7 +139,7 @@ batch_surv_jgl <- function(pdata, variable, time = "time", status = "status",
   }
 
   if (sum(pdata[[status_col]] == 1, na.rm = TRUE) < min_event) {
-    fail_df <- .add_fail_jgl(
+    fail_df <- .biomed_add_failure(
       fail_df,
       ID = "ALL",
       stage = "input",
@@ -458,7 +149,7 @@ batch_surv_jgl <- function(pdata, variable, time = "time", status = "status",
   }
 
   if (sum(pdata[[status_col]] == 0, na.rm = TRUE) < min_censored) {
-    fail_df <- .add_fail_jgl(
+    fail_df <- .biomed_add_failure(
       fail_df,
       ID = "ALL",
       stage = "input",
@@ -480,7 +171,7 @@ batch_surv_jgl <- function(pdata, variable, time = "time", status = "status",
     binary_names <- stats::setNames(character(length(variable)), variable)
     used_names <- names(pdata)
     for (v in variable) {
-      binary_names[[v]] <- .tmp_name_jgl(paste0(v, "_binary"), used_names)
+      binary_names[[v]] <- .biomed_unique_name(paste0(v, "_binary"), used_names)
       used_names <- c(used_names, binary_names[[v]])
     }
 
@@ -495,7 +186,7 @@ batch_surv_jgl <- function(pdata, variable, time = "time", status = "status",
     for (i in seq_along(variable)) {
 
       var <- variable[i]
-      pdata[[var]] <- .num_jgl(pdata[[var]])
+      pdata[[var]] <- .biomed_numeric_values(pdata[[var]])
 
       tmp <- pdata[
         !is.na(pdata[[var]]) &
@@ -515,12 +206,12 @@ batch_surv_jgl <- function(pdata, variable, time = "time", status = "status",
       } else if (length(unique(stats::na.omit(tmp[[var]]))) < 3 &&
                  fallback_cutoff == "none") {
         fail_reason <- "less than 3 unique expression values"
-      } else if (length(.valid_cutoffs_jgl(tmp[[var]], minprop = minprop)) == 0) {
+      } else if (length(.biomed_valid_cutoffs(tmp[[var]], minprop = minprop)) == 0) {
         fail_reason <- "no cutoff satisfies minprop"
       }
 
       if (!is.null(fail_reason)) {
-        fail_df <- .add_fail_jgl(
+        fail_df <- .biomed_add_failure(
           fail_df,
           ID = var,
           stage = "best_cutoff",
@@ -532,7 +223,7 @@ batch_surv_jgl <- function(pdata, variable, time = "time", status = "status",
 
       cutoff_res <- tryCatch(
         {
-          best_cutoff_jgl(
+          best_cutoff(
             pdata = tmp,
             time = time_col,
             status = status_col,
@@ -553,7 +244,7 @@ batch_surv_jgl <- function(pdata, variable, time = "time", status = "status",
       )
 
       if (is.na(cutoff_res$best_cutoff)) {
-        fail_df <- .add_fail_jgl(
+        fail_df <- .biomed_add_failure(
           fail_df,
           ID = var,
           stage = "best_cutoff",
@@ -605,7 +296,7 @@ batch_surv_jgl <- function(pdata, variable, time = "time", status = "status",
       )
 
       if (high_n < min_n || low_n < min_n) {
-        fail_df <- .add_fail_jgl(
+        fail_df <- .biomed_add_failure(
           fail_df,
           ID = var,
           stage = "best_cutoff",
@@ -617,7 +308,7 @@ batch_surv_jgl <- function(pdata, variable, time = "time", status = "status",
 
       if (min_event_group > 0 &&
           (high_event < min_event_group || low_event < min_event_group)) {
-        fail_df <- .add_fail_jgl(
+        fail_df <- .biomed_add_failure(
           fail_df,
           ID = var,
           stage = "best_cutoff",
@@ -629,7 +320,7 @@ batch_surv_jgl <- function(pdata, variable, time = "time", status = "status",
 
       if (min_censored_group > 0 &&
           (high_censored < min_censored_group || low_censored < min_censored_group)) {
-        fail_df <- .add_fail_jgl(
+        fail_df <- .biomed_add_failure(
           fail_df,
           ID = var,
           stage = "best_cutoff",
@@ -666,7 +357,7 @@ batch_surv_jgl <- function(pdata, variable, time = "time", status = "status",
   for (var in variable_for_cox) {
 
     if (!var %in% colnames(pdata)) {
-      fail_df <- .add_fail_jgl(
+      fail_df <- .biomed_add_failure(
         fail_df,
         ID = var,
         stage = "cox",
@@ -705,7 +396,7 @@ batch_surv_jgl <- function(pdata, variable, time = "time", status = "status",
     original_id <- if (best_cutoff) names(binary_names)[match(var, binary_names)] else var
 
     if (nrow(tmp_cox) < min_sample) {
-      fail_df <- .add_fail_jgl(
+      fail_df <- .biomed_add_failure(
         fail_df,
         ID = original_id,
         stage = "cox",
@@ -715,7 +406,7 @@ batch_surv_jgl <- function(pdata, variable, time = "time", status = "status",
     }
 
     if (sum(tmp_cox$status_iobr == 1, na.rm = TRUE) < min_event) {
-      fail_df <- .add_fail_jgl(
+      fail_df <- .biomed_add_failure(
         fail_df,
         ID = original_id,
         stage = "cox",
@@ -725,7 +416,7 @@ batch_surv_jgl <- function(pdata, variable, time = "time", status = "status",
     }
 
     if (sum(tmp_cox$status_iobr == 0, na.rm = TRUE) < min_censored) {
-      fail_df <- .add_fail_jgl(
+      fail_df <- .biomed_add_failure(
         fail_df,
         ID = original_id,
         stage = "cox",
@@ -735,7 +426,7 @@ batch_surv_jgl <- function(pdata, variable, time = "time", status = "status",
     }
 
     if (length(unique(tmp_cox$x)) < 2) {
-      fail_df <- .add_fail_jgl(
+      fail_df <- .biomed_add_failure(
         fail_df,
         ID = original_id,
         stage = "cox",
@@ -767,7 +458,7 @@ batch_surv_jgl <- function(pdata, variable, time = "time", status = "status",
     )
 
     if (is.null(fit)) {
-      fail_df <- .add_fail_jgl(
+      fail_df <- .biomed_add_failure(
         fail_df,
         ID = original_id,
         stage = "cox",
@@ -778,7 +469,7 @@ batch_surv_jgl <- function(pdata, variable, time = "time", status = "status",
 
     result1 <- tryCatch(
       {
-        .extract_cox_jgl(fit)
+        .biomed_extract_cox(fit)
       },
       error = function(e) {
         err_msg <<- conditionMessage(e)
@@ -787,7 +478,7 @@ batch_surv_jgl <- function(pdata, variable, time = "time", status = "status",
     )
 
     if (is.null(result1) || nrow(result1) == 0) {
-      fail_df <- .add_fail_jgl(
+      fail_df <- .biomed_add_failure(
         fail_df,
         ID = original_id,
         stage = "cox",
@@ -848,7 +539,7 @@ batch_surv_jgl <- function(pdata, variable, time = "time", status = "status",
       if (!binary_col %in% colnames(pdata)) next
       if (!original_var %in% colnames(pdata)) next
 
-      expr <- .num_jgl(pdata[[original_var]])
+      expr <- .biomed_numeric_values(pdata[[original_var]])
       bin <- pdata[[binary_col]]
 
       result$high[i] <- sum(bin == 1, na.rm = TRUE)

@@ -1,8 +1,8 @@
-\name{donutPie}
-\alias{donutPie}
+\name{donut_pie}
+\alias{donut_pie}
 \title{Draw donut charts for categorical variables}
 \usage{
-donutPie(df, vars, blank = 0.8, linewidth = 2.5, showtext = TRUE,
+donut_pie(df, vars, blank = 0.8, linewidth = 2.5, showtext = TRUE,
   text_type = c("both", "percent", "count"), show_center_n = TRUE,
   removeNA = TRUE, na_label = "NA", color_list = NULL, legend = TRUE)
 }
@@ -23,5 +23,5 @@ donutPie(df, vars, blank = 0.8, linewidth = 2.5, showtext = TRUE,
 \description{Creates one donut chart for each requested categorical variable.}
 \examples{
 d <- data.frame(response = factor(c("CR", "PR", "SD", "PR")))
-donutPie(d, "response")
+donut_pie(d, "response")
 }

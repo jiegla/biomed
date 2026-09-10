@@ -1,3 +1,14 @@
+# biomed 0.3.0
+
+* Give each exported function a matching R source filename; split bundled APIs
+  and keep shared private helpers in internal_utils.R.
+* Remove personal suffixes: best_cutoff_jgl -> best_cutoff,
+  batch_surv_jgl -> batch_surv, get_cor_jgl -> get_cor, vennjgl -> venn_plot.
+* Normalize batch_ANOVA -> anova_batch, donutPie -> donut_pie, and
+  cophx_batch -> cox_batch. Avoid case-only source filename collisions.
+* Update calls, exports, help pages and tests. Function arguments and algorithms
+  are unchanged. Old renamed exports are removed; see README migration table.
+
 # biomed 0.2.0
 
 * Added survival cutoff selection, screened batch Cox analysis, Kaplan-Meier

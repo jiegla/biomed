@@ -1,6 +1,6 @@
 Package: biomed
 Title: Clinical and Biomedical Research Utilities
-Version: 0.2.0
+Version: 0.3.0
 Authors@R:
     person("Guangling", "Jie", , "104247086+jiegla@users.noreply.github.com",
            role = c("aut", "cre"))

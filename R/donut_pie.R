@@ -18,7 +18,7 @@
 #'
 #' @return A named list of ggplot objects.
 #' @export
-donutPie <- function(
+donut_pie <- function(
     df,
     vars,
     blank = 0.8,

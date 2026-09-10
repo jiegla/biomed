@@ -22,7 +22,7 @@ plot_correlation(data, x, y, group = NULL,
 \item{remove_y_zero}{Remove original y values equal to zero before scaling.}
 \item{show_plot}{Print the plot.}
 \item{output_dir}{Output directory; NULL writes no files. The legacy surv_fig_hr default writes a text log in Surv_Output.}
-\item{save_data}{Also export analyzed plot data as RData. Legacy get_cor_jgl defaults to TRUE when saving a plot; plot_correlation defaults to FALSE.}
+\item{save_data}{Also export analyzed plot data as RData. Legacy get_cor defaults to TRUE when saving a plot; plot_correlation defaults to FALSE.}
 \item{...}{Additional plot styling and export arguments passed to the underlying plotting function. Do not repeat arguments already mapped by the wrapper.}
 }
 \description{Compute correlation and plot the same filtered observations. Supports Pearson, Spearman and Kendall tests, group colors, labels, regression lines, density contours and optional export.}

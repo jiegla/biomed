@@ -1,9 +1,9 @@
 test_that("standard analysis interfaces preserve the legacy calculations", {
   d <- data.frame(group = rep(c("A", "B"), each = 6),
                   marker = c(1:6, 5:10), status = rep(0:1, 6), time = c(5, 2, 8, 4, 1, 7, 3, 9, 6, 12, 10, 11))
-  expect_equal(batch_anova(d, "marker")$p_value, batch_ANOVA(d, feature = "marker")$p.value)
+  expect_equal(batch_anova(d, "marker")$p_value, anova_batch(d, feature = "marker")$p.value)
   expect_equal(batch_cox(d, "marker", "time", "status")$hr,
-               cophx_batch("marker", d, "time", "status")$HR)
+               cox_batch("marker", d, "time", "status")$HR)
   expect_equal(batch_chi_square(d, "group")$p_value,
                chi_square_batch_df(d, "group")$P_Value)
   expect_equal(make_group(d, "marker"), makegroup(d, "marker"))

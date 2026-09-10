@@ -8,7 +8,7 @@ find_survival_cutoff(data, variable, time = "time", status = "status",
 }
 \arguments{
 \item{data}{Data frame; plot_correlation also accepts a matrix.}
-\item{variable}{Predictor column name for cutoff selection; a vector of predictor names for batch_surv_jgl.}
+\item{variable}{Predictor column name for cutoff selection; a vector of predictor names for batch_surv.}
 \item{time}{Follow-up time column, containing nonnegative numeric values.}
 \item{status}{Outcome column.}
 \item{min_prop}{Minimum fraction per cutoff group, in (0, 0.5].}
