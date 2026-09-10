@@ -12,7 +12,7 @@ get_cor(
     subtype = NULL,
     na.subtype.rm = FALSE,
     color_subtype = NULL,
-    palette = "jama",
+    palette = "biomed",
     index = NULL,
     method = c("spearman", "pearson", "kendall"),
     show_cor_result = FALSE,
@@ -55,7 +55,7 @@ get_cor(
 \item{subtype}{Optional grouping column for colors and group-specific regression lines.}
 \item{na.subtype.rm}{Drop missing group values before correlation calculation and plotting.}
 \item{color_subtype}{Optional group colors, optionally named.}
-\item{palette}{ggsci palette: jama, npg, aaas, nejm, lancet, jco or d3; used when group colors are not supplied.}
+\item{palette}{Built-in biomed (default), or a ggsci palette: jama, npg, aaas, nejm, lancet, jco or d3; used when group colors are not supplied.}
 \item{index}{Optional output filename prefix; defaults to 1.}
 \item{method}{Correlation method: spearman, pearson or kendall.}
 \item{show_cor_result}{Print the cor.test result.}

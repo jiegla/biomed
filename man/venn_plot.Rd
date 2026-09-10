@@ -3,7 +3,7 @@
 \title{Draw a Venn diagram and extract partitions}
 \usage{
 venn_plot(list, venn_name = "test", col = NULL,
-  palette = c("npg", "aaas", "nejm", "lancet", "jama"),
+  palette = c("biomed", "npg", "aaas", "nejm", "lancet", "jama"),
   fill_col = NULL, cat.col = NULL, showFigure = TRUE,
   file_type = c("tif", "png", "pdf"), width = 6, height = 5,
   units = "in", res = 300, alpha = 0.3, cex = 1.5, cat.cex = 2,

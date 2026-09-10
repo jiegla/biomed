@@ -175,14 +175,7 @@
 }
 
 .biomed_palette <- function(n) {
-  base <- c(
-    "#E64B35", "#4DBBD5", "#00A087", "#3C5488", "#F39B7F",
-    "#8491B4", "#91D1C2", "#DC0000", "#7E6148", "#B09C85"
-  )
-  if (n <= length(base)) {
-    return(base[seq_len(n)])
-  }
-  grDevices::colorRampPalette(base)(n)
+  biomed_colors(n)
 }
 
 .biomed_significance <- function(p) {

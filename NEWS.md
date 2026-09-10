@@ -1,3 +1,11 @@
+# biomed 0.3.1
+
+* Add biomed_colors() with the supplied 14 RGBA colors, preserving CC alpha.
+  Default categorical palettes, including correlation and Venn plots, use it.
+  Explicit custom colors and named ggsci palettes remain available.
+* Register grid.draw.ggsurvplot in surv_fig_hr.R so grid.draw and ggsave can
+  draw complete survival plots with risk tables without a global helper.
+
 # biomed 0.3.0
 
 * Give each exported function a matching R source filename; split bundled APIs

@@ -26,7 +26,7 @@ venn_plot <- function(
     list,
     venn_name = "test",
     col = NULL,
-    palette = c("npg", "aaas", "nejm", "lancet", "jama"),
+    palette = c("biomed", "npg", "aaas", "nejm", "lancet", "jama"),
     fill_col = NULL,
     cat.col = NULL,
     showFigure = TRUE,
@@ -70,7 +70,9 @@ venn_plot <- function(
     cli::cli_abort("{.arg file_type} supports only {.val tif}, {.val png}, and {.val pdf}.")
   }
 
-  auto_colours <- if (requireNamespace("ggsci", quietly = TRUE)) {
+  auto_colours <- if (identical(palette, "biomed")) {
+    biomed_colors(n_set)
+  } else if (requireNamespace("ggsci", quietly = TRUE)) {
     fn <- switch(
       palette,
       npg = ggsci::pal_npg("nrc"), aaas = ggsci::pal_aaas(),

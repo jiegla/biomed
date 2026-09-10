@@ -13,6 +13,25 @@ publication-ready tables and figures.
 > `biomed` is for research use only. It is not medical advice and is not a
 > validated clinical decision-support system.
 
+## Built-in colors and survival export
+
+`biomed_colors()` returns the 14 package colors in their supplied order,
+including the `CC` alpha channel (80% opacity). `biomed_colors(n)` selects
+colors, or interpolates when more than 14 are needed. Default categorical
+plots use this palette; explicit colors and named ggsci palettes still work.
+
+```r
+biomed_colors()
+# p <- surv_fig_hr("group", d, time = "time", status = "status",
+#                  output_dir = NULL)
+# ggplot2::ggsave("survival.pdf", plot = p, width = 8, height = 7)
+# ggplot2::ggsave("survival.png", plot = p, width = 8, height = 7, dpi = 300)
+```
+
+The package registers `grid.draw.ggsurvplot()` automatically. Saving the whole
+`p` object includes its risk table; saving `p$plot` saves only the curve panel.
+You do not need to define a helper in your workspace.
+
 ## Function naming (0.3.0)
 
 Public functions each have a matching `R/function_name.R` file. Shared internal
