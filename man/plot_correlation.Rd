@@ -6,7 +6,8 @@ plot_correlation(data, x, y, group = NULL,
                               method = c("spearman", "pearson", "kendall"),
                               scale = TRUE, colors = NULL, remove_group_na = FALSE,
                               remove_x_zero = FALSE, remove_y_zero = FALSE,
-                              show_plot = FALSE, output_dir = NULL, save_data = FALSE, ...)
+                              show_plot = FALSE, output_dir = NULL,
+                              save_data = FALSE, ...)
 }
 \arguments{
 \item{data}{Data frame; plot_correlation also accepts a matrix.}
