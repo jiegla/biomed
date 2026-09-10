@@ -76,8 +76,11 @@ pairwise_survival <- function(data, group, time = "time", status = "status",
   dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
   for (ext in formats) {
     file <- file.path(output_dir, paste0(sanitize_filename(filename), ".", ext))
-    if (ext == "pdf") grDevices::pdf(file, width = width, height = height)
-    else grDevices::png(file, width = width, height = height, units = "in", res = 150)
+    if (ext == "pdf") {
+      grDevices::pdf(file, width = width, height = height)
+    } else {
+      grDevices::png(file, width = width, height = height, units = "in", res = 150)
+    }
     tryCatch(print(plot), finally = grDevices::dev.off())
   }
   stats <- attr(plot, "statistics")
@@ -119,8 +122,11 @@ plot_survival <- function(data, group, time = "time", status = "status",
   if (length(max_time) != 1L || !is.numeric(max_time) || !is.finite(max_time) || max_time <= 0) {
     stop("max_time must be a positive finite number.")
   }
-  fit <- if (ng > 1L) survival::survfit(survival::Surv(.time, .status) ~ .group, data = d)
-         else survival::survfit(survival::Surv(.time, .status) ~ 1, data = d)
+  fit <- if (ng > 1L) {
+    survival::survfit(survival::Surv(.time, .status) ~ .group, data = d)
+  } else {
+    survival::survfit(survival::Surv(.time, .status) ~ 1, data = d)
+  }
   medians <- survminer::surv_median(fit)
   if (ng > 1L && sort_by_median) {
     lv <- levels(d$.group)[order(-medians$median, na.last = TRUE)]
@@ -181,8 +187,11 @@ plot_survival <- function(data, group, time = "time", status = "status",
 surv_fig_hr <- function(group_var, df, max_time = 60, time = "OS",
                         status = "Survival_status", hr = "yes", cols = NULL,
                         x.label = "Months", output_dir = "Surv_Output", ...) {
-  if (is.null(cols) || !length(cols) || all(is.na(cols))) cols <- NULL
-  else cols <- rep(cols, length.out = length(unique(stats::na.omit(df[[group_var]]))))
+  if (is.null(cols) || !length(cols) || all(is.na(cols))) {
+    cols <- NULL
+  } else {
+    cols <- rep(cols, length.out = length(unique(stats::na.omit(df[[group_var]]))))
+  }
   gp <- plot_survival(df, group_var, time, status, max_time = max_time,
                       show_hr = identical(hr, "yes"), colors = cols, x_label = x.label,
                       status_encoding = "auto", sort_by_median = TRUE, ...)

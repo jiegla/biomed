@@ -5,6 +5,7 @@
 
 .status01_jgl <- function(x, encoding = "auto") {
   encoding <- match.arg(encoding, c("auto", "01", "12", "labels"))
+  if (is.logical(x) && encoding %in% c("01", "auto", "labels")) return(as.numeric(x))
   raw <- trimws(tolower(as.character(x)))
   numeric_x <- suppressWarnings(as.numeric(raw))
   present <- !is.na(x)

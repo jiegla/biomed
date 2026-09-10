@@ -21,6 +21,7 @@ test_that("status conversion is explicit and never silently loses unknown labels
   expect_equal(biomed:::.status01_jgl(factor(c("1", "2")), "auto"), c(0, 1))
   expect_error(biomed:::.status01_jgl(c("alive", "unknown")), "Unrecognized")
   expect_error(biomed:::.status01_jgl(c(0, 2), "01"), "encoding")
+  expect_equal(biomed:::.status01_jgl(c(TRUE, FALSE, NA), "01"), c(1, 0, NA))
 })
 
 test_that("batch survival retains all contrasts and reports failures", {
@@ -76,6 +77,11 @@ test_that("correlation filters original zeros and missing groups before scaling"
                unname(stats::cor.test(used$x, used$y, method = "spearman", exact = FALSE)$estimate))
   expect_equal(p$data$x, as.numeric(scale(used$x)))
   expect_equal(p$data$y, as.numeric(scale(used$y)))
+  collision <- data.frame(categorys = 1:8, y = c(2, 4, 1, 3, 8, 7, 5, 6), g = rep(c("a", "b"), 4))
+  pp <- plot_correlation(collision, "categorys", "y", group = "g", scale = FALSE,
+                          colors = c(a = "red", b = "blue"), add.regress = FALSE)
+  expect_equal(pp$data$categorys, collision$categorys)
+  expect_silent(ggplot2::ggplot_build(pp))
   for (method in c("pearson", "spearman", "kendall")) {
     p <- plot_correlation(d, 1, 2, method = method, scale = FALSE, add.regress = FALSE)
     expect_equal(attr(p, "correlation")$p_value,

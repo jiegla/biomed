@@ -222,24 +222,26 @@ get_cor_jgl <- function(
 
   if (!is.null(subtype)) {
 
-    data$categorys <- data[[subtype]]
+    group_col <- .tmp_name_jgl(".biomed_group", names(data))
+    data[[group_col]] <- data[[subtype]]
 
     if (na.subtype.rm) {
-      data <- data[!is.na(data$categorys), , drop = FALSE]
+      data <- data[!is.na(data[[group_col]]), , drop = FALSE]
     }
 
-    data$categorys <- as.character(data$categorys)
-    data$categorys[is.na(data$categorys)] <- "Not_available"
-    data$categorys <- factor(data$categorys)
+    data[[group_col]] <- as.character(data[[group_col]])
+    data[[group_col]][is.na(data[[group_col]])] <- "Not_available"
+    data[[group_col]] <- factor(data[[group_col]])
 
-    cli::cli_alert_info("Groups: {.val {levels(data$categorys)}}")
+    color_subtype <- .biomed_colour_values(levels(data[[group_col]]), color_subtype)
+    cli::cli_alert_info("Groups: {.val {levels(data[[group_col]])}}")
 
     p <- ggplot2::ggplot(
       data,
       ggplot2::aes(
         x = .data[[var1]],
         y = .data[[var2]],
-        colour = .data$categorys
+        colour = .data[[group_col]]
       )
     ) +
       ggplot2::geom_point(
