@@ -23,11 +23,79 @@ publication-ready tables and figures.
 
 ## Installation
 
-The package is under active development. After the repository is available:
+Install the development version from GitHub:
 
 ```r
 pak::pak("jiegla/biomed")
 ```
+
+## Standardized API
+
+New code should use the interfaces below. All original entry points remain
+exported and retain their result column names.
+
+| Original name | Standard name |
+|---|---|
+| `makegroup()` | `make_group()` |
+| `batch_ANOVA()` | `batch_anova()` |
+| `chi_square_batch_df()` | `batch_chi_square()` |
+| `cophx_batch()` | `batch_cox()` |
+| `roc_batch()` | `batch_roc()` |
+| `plot_roc_batch()` | `plot_roc()` |
+| `donutPie()` | `plot_donut()` |
+| `draw_stack_barplot()` | `plot_stacked_bar()` |
+| `vennjgl()` | `plot_venn()` |
+
+The new interfaces consistently use `data`, `variables`, `output_dir`,
+`colors` and `remove_na` where applicable. Analysis tables use
+`variable`, `p_value`, `p_adjust` and other snake_case columns.
+Grouping returns augmented data; donut and ROC plotting return named plot lists;
+stacked bars return `plots` and `statistics`. Venn returns its drawing,
+partitions and file paths.
+
+`output_dir = NULL` writes no files. Supply a directory to export batch
+analysis tables as XLSX and figures as PDF/PNG (Venn also supports TIFF).
+Existing output filenames are overwritten. Options not renamed by a new wrapper
+can still be passed using the original parameter names through `...`.
+
+```r
+d <- data.frame(
+  group = rep(c("A", "B"), each = 6),
+  marker = c(1:6, 5:10),
+  response = rep(c("No", "Yes"), 6)
+)
+batch_anova(d, variables = "marker", group = "group")
+batch_roc(d, "marker", response = "response", positive_class = "Yes")
+plot_stacked_bar(d, variables = "response", group = "group")
+# batch_anova(d, "marker", output_dir = "results") # XLSX
+```
+
+### Compatibility and statistical choices
+
+- The nine original names remain callable. New wrappers rename columns; the
+  original functions retain their historical package column names.
+- `feature_manipulation = TRUE` again filters incomplete, non-numeric,
+  infinite and constant features. It no longer needs IOBR.
+- Three-group cutoffs use the original 0.33/0.66 quantiles. Tied cutoffs keep all
+  rows and the Low/Middle/High levels; some groups can legitimately be empty.
+- Automatic categorical tests use Fisher whenever any expected cell count is
+  below five. Large exact tests can fail; batch results retain the error.
+- Cox requires 0 = censored and 1 = event. Multi-level factors return all contrasts.
+- Standard ROC interfaces infer the positive class only when omitted and record
+  it in the result. Set it explicitly in research scripts. The original
+  `roc_batch()` retains its default positive class of `"1"`.
+- ROC plots label false-positive rate correctly. Tied optimal cutoffs select the
+  first finite observed optimum; fixed-sensitivity/specificity grouping selects
+  a realizable threshold meeting at least the target, rather than interpolating.
+  Low/High labels always describe predictor magnitude, regardless of ROC direction.
+- ROC confidence intervals for perfect separation can warn; this is retained.
+  Optimized thresholds and same-data AUCs require independent validation.
+- Two to five sets use Venn geometry. Six sets use an exact membership matrix
+  because the VennDiagram backend supports at most five sets.
+- Legacy stacked bars save only with `save = TRUE`; their original CSV export
+  remains available through `statistics_format = "csv"`. XLSX is the default.
+  Legacy Venn retains its automatic file output; new plotting wrappers do not
+  write unless `output_dir` is supplied.
 
 ## Included utilities
 

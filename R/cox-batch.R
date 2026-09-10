@@ -18,7 +18,17 @@ cophx_batch <- function(
     status = "PFS_status",
     conf_level = 0.95) {
   pdata <- as.data.frame(pdata)
+  .biomed_validate_columns(var)
   .biomed_required_columns(pdata, c(time, status, var))
+  event <- .biomed_as_numeric(pdata[[status]], status)
+  followup <- .biomed_as_numeric(pdata[[time]], time)
+  if (any(!is.na(event) & !event %in% c(0, 1))) {
+    cli::cli_abort("Event status must be coded 0 (censored) or 1 (event).")
+  }
+  if (any(followup < 0, na.rm = TRUE)) {
+    cli::cli_abort("Survival time must be non-negative.")
+  }
+  .biomed_probability(conf_level, "conf_level")
   if (!is.character(var) || !length(var)) {
     cli::cli_abort("{.arg var} must be a non-empty character vector.")
   }

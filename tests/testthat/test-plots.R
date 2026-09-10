@@ -23,7 +23,7 @@ test_that("plot_roc_batch returns plots and writes nothing when path is null", {
   skip_if_not_installed("pROC")
   d <- data.frame(
     response = factor(rep(c("No", "Yes"), each = 10)),
-    marker = c(1:10, 11:20)
+    marker = c(1:10, 6:15)
   )
   plots <- plot_roc_batch(
     d, "response", "marker", positive_class = "Yes", direction = "<"

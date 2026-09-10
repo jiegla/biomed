@@ -10,7 +10,10 @@
   if (length(observed) != 2L) {
     cli::cli_abort("{.arg response} must contain exactly two observed classes.")
   }
-  positive <- as.character(positive_class)
+  positive <- if (is.null(positive_class)) observed[2L] else as.character(positive_class)
+  if (length(positive) != 1L || is.na(positive)) {
+    cli::cli_abort("{.arg positive_class} must identify exactly one observed class.")
+  }
   if (!positive %in% observed) {
     cli::cli_abort("Positive class {.val {positive}} was not found in {.arg response}.")
   }
@@ -68,6 +71,8 @@ roc_batch <- function(
   method <- match.arg(method)
   pdata <- as.data.frame(pdata)
   .biomed_required_columns(pdata, c(outcome, vars))
+  .biomed_validate_columns(vars)
+  .biomed_probability(conf_level, "conf_level")
 
   rows <- lapply(vars, function(var) {
     tryCatch({
@@ -85,7 +90,7 @@ roc_batch <- function(
         )
         values <- as.numeric(as.data.frame(coords)$threshold)
         values <- values[is.finite(values)]
-        if (!length(values)) NA_real_ else stats::median(values)
+        if (!length(values)) NA_real_ else values[1L]
       } else {
         stats::median(dat$.predictor)
       }
@@ -106,6 +111,7 @@ roc_batch <- function(
         Recall = unname(metrics["Recall"]), N = nrow(dat),
         Positive = sum(dat$.response == prepared$positive),
         Negative = sum(dat$.response == prepared$negative),
+        Positive_Class = prepared$positive, Negative_Class = prepared$negative,
         Direction = roc_obj$direction, Error = NA_character_,
         stringsAsFactors = FALSE, check.names = FALSE
       )
@@ -115,7 +121,8 @@ roc_batch <- function(
         AUC_CI_upper = NA_real_, Threshold = NA_real_, Specificity = NA_real_,
         Sensitivity = NA_real_, Accuracy = NA_real_, Precision = NA_real_,
         Recall = NA_real_, N = NA_integer_, Positive = NA_integer_,
-        Negative = NA_integer_, Direction = NA_character_,
+        Negative = NA_integer_, Positive_Class = NA_character_,
+        Negative_Class = NA_character_, Direction = NA_character_,
         Error = conditionMessage(e), stringsAsFactors = FALSE
       )
     })
@@ -150,7 +157,7 @@ plot_roc_batch <- function(
     main = NULL,
     alpha = 1,
     smooth = FALSE,
-    positive_class = "1",
+    positive_class = NULL,
     direction = "auto",
     file_type = c("png", "pdf"),
     width = 5,
@@ -159,6 +166,7 @@ plot_roc_batch <- function(
   .biomed_require("pROC")
   data <- as.data.frame(data)
   .biomed_required_columns(data, c(response, variables))
+  .biomed_validate_columns(variables)
   file_type <- match.arg(file_type, c("png", "pdf"), several.ok = TRUE)
   if (!is.null(fig.path)) dir.create(fig.path, recursive = TRUE, showWarnings = FALSE)
 
@@ -167,7 +175,7 @@ plot_roc_batch <- function(
     roc_obj <- pROC::roc(
       prepared$data$.response, prepared$data$.predictor,
       levels = c(prepared$negative, prepared$positive),
-      direction = direction, quiet = TRUE, ci = TRUE
+      direction = direction, quiet = TRUE
     )
     if (smooth) roc_obj <- pROC::smooth(roc_obj)
     ci <- as.numeric(pROC::ci.auc(roc_obj))
@@ -176,8 +184,8 @@ plot_roc_batch <- function(
       "AUC = ", sprintf("%.3f", as.numeric(pROC::auc(roc_obj))),
       " (95% CI ", sprintf("%.3f", ci[1L]), "-", sprintf("%.3f", ci[3L]), ")"
     )
-    p <- pROC::ggroc(roc_obj, alpha = alpha) +
-      ggplot2::geom_abline(slope = 1, intercept = 1, linetype = "dashed", colour = "grey60") +
+    p <- pROC::ggroc(roc_obj, alpha = alpha, legacy.axes = TRUE) +
+      ggplot2::geom_abline(slope = -1, intercept = 1, linetype = "dashed", colour = "grey60") +
       ggplot2::labs(title = title, x = "False positive rate", y = "True positive rate") +
       ggplot2::coord_equal() +
       ggplot2::theme_bw()

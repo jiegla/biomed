@@ -27,7 +27,7 @@ roc_batch(vars, pdata, outcome, method = c("best", "median"),
   positive_class = "1", direction = "auto", conf_level = 0.95)
 
 plot_roc_batch(data, response, variables, fig.path = NULL, main = NULL,
-  alpha = 1, smooth = FALSE, positive_class = "1", direction = "auto",
+  alpha = 1, smooth = FALSE, positive_class = NULL, direction = "auto",
   file_type = c("png", "pdf"), width = 5, height = 5, dpi = 300)
 }
 \arguments{
@@ -42,7 +42,7 @@ plot_roc_batch(data, response, variables, fig.path = NULL, main = NULL,
   \item{direction}{ROC direction passed to \code{pROC::roc()}.}
   \item{add_method_suffix}{Include the method in new column names.}
   \item{verbose}{Print cutoff summaries.}
-  \item{feature_manipulation}{Deprecated compatibility argument.}
+  \item{feature_manipulation}{Filter incomplete, non-numeric, infinite and constant features.}
   \item{test_method}{Association-test selection.}
   \item{correct}{Use Yates' correction for 2-by-2 chi-square tests.}
   \item{conf_level}{Confidence level.}

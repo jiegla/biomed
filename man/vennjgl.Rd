@@ -26,7 +26,8 @@ vennjgl(list, venn_name = "test", col = NULL,
   \item{write_xlsx}{Save the partition table as XLSX.}
 }
 \value{Invisibly, a list containing the grob, partition table, and output paths.}
-\description{Creates Venn diagrams and an auditable table of set partitions.}
+\description{Creates Venn diagrams for two to five sets and an exact intersection
+membership matrix for six sets, with an auditable table of set partitions.}
 \examples{
 if (requireNamespace("VennDiagram", quietly = TRUE)) {
   vennjgl(list(A = letters[1:4], B = letters[3:6]),

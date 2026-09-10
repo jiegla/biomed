@@ -4,4 +4,5 @@
 #' and publication-ready reporting.
 #'
 #' @keywords internal
+#' @importFrom rlang .data
 "_PACKAGE"
