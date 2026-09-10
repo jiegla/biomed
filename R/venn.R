@@ -127,13 +127,7 @@ vennjgl <- function(
     image_files <- vapply(file_type, draw_to_device, character(1))
   }
 
-  partition <- VennDiagram::get.venn.partitions(list)
-  partition$values <- vapply(
-    partition[["..values.."]], paste, collapse = ", ", FUN.VALUE = character(1)
-  )
-  partition[["..values.."]] <- NULL
-  names(partition)[names(partition) == "..set.."] <- "set"
-  names(partition)[names(partition) == "..count.."] <- "count"
+  partition <- .biomed_partitions(list)
   excel_file <- NULL
   if (isTRUE(write_xlsx)) {
     .biomed_require("openxlsx", "It is used to save Venn partitions.")
@@ -145,6 +139,25 @@ vennjgl <- function(
     venn_plot = venn_plot, partition = partition,
     image_files = image_files, excel_file = excel_file
   ))
+}
+
+.biomed_partitions <- function(sets) {
+  universe <- unique(unlist(sets, use.names = FALSE))
+  masks <- as.matrix(expand.grid(rep(base::list(c(FALSE, TRUE)), length(sets))))
+  masks <- masks[rowSums(masks) > 0L, , drop = FALSE]
+  result <- as.data.frame(masks)
+  names(result) <- names(sets)
+  members <- lapply(seq_len(nrow(masks)), function(i) {
+    keep <- rep(TRUE, length(universe))
+    for (j in seq_along(sets)) {
+      keep <- keep & ((universe %in% sets[[j]]) == masks[i, j])
+    }
+    universe[keep]
+  })
+  result$set <- apply(masks, 1L, function(x) paste(names(sets)[x], collapse = " & "))
+  result$count <- lengths(members)
+  result$values <- vapply(members, paste, collapse = ", ", FUN.VALUE = character(1))
+  result
 }
 
 # VennDiagram supports at most five sets. Six sets use an exact membership

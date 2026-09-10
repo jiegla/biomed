@@ -83,3 +83,16 @@ test_that("Venn works for two through six sets and retains exact members", {
     expect_length(out$image_files, 0)
   }
 })
+
+test_that("unequal Venn partitions preserve all members and export correctly", {
+  skip_if_not_installed("VennDiagram")
+  skip_if_not_installed("openxlsx")
+  path <- tempfile()
+  on.exit(unlink(path, recursive = TRUE))
+  out <- plot_venn(list(A = letters[1:4], B = letters[3:6]), show_plot = FALSE,
+                   output_dir = path, file_type = "pdf")
+  expect_equal(sum(out$partition$count), 6L)
+  expect_equal(out$partition$values[out$partition$A & out$partition$B], "c, d")
+  expect_true(all(file.exists(c(out$image_files, out$excel_file))))
+  expect_equal(sum(openxlsx::read.xlsx(out$excel_file)$count), 6L)
+})
