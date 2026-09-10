@@ -137,6 +137,64 @@ suggested packages that are installed on demand by users who need those
 features. Functions do not require patient identifiers, and examples and tests
 use synthetic data only.
 
+## Survival and correlation tools (0.2.0)
+
+| Original function | Standard interface | Main purpose |
+| --- | --- | --- |
+| `best_cutoff_jgl()` | `find_survival_cutoff()` | Survival cutoff with valid-group checks and median fallback |
+| `batch_surv_jgl()` | `batch_survival()` | Batch Cox models, eligibility thresholds, failures and FDR |
+| `surv_fig_hr()` | `plot_survival()` | Kaplan-Meier curves, risk table, medians and directed HR |
+| Internal pairwise helper | `pairwise_survival()` | Named pairwise HRs and log-rank tests |
+| `get_cor_jgl()` | `plot_correlation()` | Correlation statistics, scatter plots, labels and exports |
+| `sanitize_filename()` | `sanitize_filename()` | Safe output file names without a pipe dependency |
+
+The new survival interfaces default to **0 = censored, 1 = event**. Specify
+`status_encoding = "12"` for 1 = censored, 2 = event, or `"labels"` for words
+such as `alive`/`dead`. Legacy interfaces retain automatic detection, which
+treats an all-1 cohort as all events; use an explicit encoding for ambiguous data.
+HRs always describe the named group relative to the named reference. No HR is
+inverted merely because it exceeds 1. All fits use the full eligible follow-up;
+`max_time` only limits the plot display.
+
+```r
+set.seed(42)
+d <- data.frame(
+  time = rexp(120), status = rep(c(1, 1, 0), 40),
+  group = factor(rep(c("A", "B"), 60)), marker = rnorm(120)
+)
+analysis <- batch_survival(d, c("marker", "group"))
+analysis$results
+analysis$failed
+
+# Optional packages: install.packages(c("survminer", "ggsci", "openxlsx"))
+km <- plot_survival(d, "group", reference = "A")
+print(km)
+attr(km, "statistics")
+pairwise_survival(d, "group", reference = "A")
+
+p <- plot_correlation(d, "marker", "time", scale = FALSE)
+attr(p, "correlation")
+print(p)
+
+# Optional exports:
+# batch_survival(d, "marker", output_dir = "results")
+# plot_survival(d, "group", output_dir = "results")
+```
+
+`plot_survival()` exports the curve **and risk table** together as PDF/PNG plus
+a statistics text file. New interfaces write nothing unless `output_dir` is
+provided. Legacy `surv_fig_hr()` retains its `Surv_Output` text log; disable it
+with `output_dir = NULL`. Legacy `get_cor_jgl(save_plot = TRUE, path = ...)`
+retains the analyzed-data RData export; disable it with `save_data = FALSE`.
+The new `plot_correlation()` requires `save_data = TRUE` to export data.
+
+Correlation removes original zero values and missing groups before scaling or
+testing, so the reported sample matches the plot. Grouped regression lines
+remain group-specific; the annotated correlation is for all retained rows.
+Cutoff selection is exploratory: downstream Cox P values and confidence
+intervals do not account for selecting the cutoff on the same data, and BH
+correction does not remove this selection bias.
+
 ## Roadmap modules
 
 - `clinical`: cohort cleaning, endpoint derivation, response and survival.
