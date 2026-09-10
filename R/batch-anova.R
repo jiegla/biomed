@@ -38,7 +38,7 @@ batch_ANOVA <- function(
   }
   skipped <- setdiff(feature, numeric_feature)
   if (length(skipped)) {
-    cli::cli_warn("Non-numeric features were skipped: {skipped}.")
+    cli::cli_warn("Invalid or filtered features were skipped: {skipped}.")
   }
   if (!length(numeric_feature)) {
     cli::cli_abort("No numeric features are available for ANOVA.")

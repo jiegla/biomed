@@ -89,7 +89,7 @@ draw_stack_barplot <- function(
 
     chi <- suppressWarnings(stats::chisq.test(tab, correct = FALSE))
     use_fisher <- test_method == "fisher" ||
-      (test_method == "auto" && all(dim(tab) == c(2L, 2L)) && any(chi$expected < 5))
+      (test_method == "auto" && any(chi$expected < 5))
     test <- if (use_fisher) stats::fisher.test(tab) else chi
     method <- if (use_fisher) "Fisher exact test" else "Chi-square test"
     p_value <- unname(test$p.value)

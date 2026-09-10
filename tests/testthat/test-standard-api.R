@@ -43,6 +43,9 @@ test_that("numeric factors keep their numeric values in ROC", {
   expect_equal(out$auc, as.numeric(pROC::auc(reference)))
   expect_equal(out$positive_class, "Yes")
   expect_true(is.na(out$error))
+  curve <- plot_roc(d, "x", "y", positive_class = "Yes", direction = "<")$x
+  expect_equal(curve$data$false_positive_rate, 1 - reference$specificities)
+  expect_equal(curve$data$true_positive_rate, reference$sensitivities)
   for (method in c("fixed_sensitivity", "fixed_specificity")) {
     grouped <- make_group(d, "x", method = method, response = "y",
                            positive_class = "Yes", direction = "<", fixed_value = 0.7)

@@ -184,8 +184,15 @@ plot_roc_batch <- function(
       "AUC = ", sprintf("%.3f", as.numeric(pROC::auc(roc_obj))),
       " (95% CI ", sprintf("%.3f", ci[1L]), "-", sprintf("%.3f", ci[3L]), ")"
     )
-    p <- pROC::ggroc(roc_obj, alpha = alpha, legacy.axes = TRUE) +
-      ggplot2::geom_abline(slope = -1, intercept = 1, linetype = "dashed", colour = "grey60") +
+    curve_data <- data.frame(
+      false_positive_rate = 1 - roc_obj$specificities,
+      true_positive_rate = roc_obj$sensitivities
+    )
+    p <- ggplot2::ggplot(curve_data, ggplot2::aes(
+      x = .data[["false_positive_rate"]], y = .data[["true_positive_rate"]]
+    )) +
+      ggplot2::geom_path(alpha = alpha) +
+      ggplot2::geom_abline(slope = 1, intercept = 0, linetype = "dashed", colour = "grey60") +
       ggplot2::labs(title = title, x = "False positive rate", y = "True positive rate") +
       ggplot2::coord_equal() +
       ggplot2::theme_bw()

@@ -130,6 +130,7 @@ plot_stacked_bar <- function(data, variables, group, colors = NULL,
     save = !is.null(output_dir), return_plot = TRUE, ...
   )
   names(result)[names(result) == "plot"] <- "plots"
+  result$statistics <- .biomed_standard_table(result$statistics, c(N = "n"))
   result
 }
 
