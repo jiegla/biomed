@@ -319,7 +319,7 @@ Install [SCENIC](https://github.com/aertslab/SCENIC) and its dependencies separa
 obtain species-compatible cisTarget ranking databases before calling:
 
 ```r
-remotes::install_github("aertslab/SCENIC")
+remotes::install_github(c("aertslab/RcisTarget", "aertslab/SCENIC"))
 result <- biomed::sce_run_scenic(sce, db_dir = "/path/to/cisTarget",
   dbs = c("compatible-ranking-database.feather"), species = "human",
   output_dir = "scenic_output", n_cores = 8)
