@@ -1,3 +1,13 @@
+# biomed 0.4.0
+
+- Add six single-cell workflows with consistent `sce_` names and matching R files.
+- Preserve contributed analysis reports, figures, sample-level tests and cell-level options.
+- Add explicit CSV encoding and sample-matching controls, preserving leading-zero IDs.
+- Align expression and score matrices by cell names and respect assay/layer selection.
+- Update GSVA scoring to its parameter-object API; support UCell and AUCell.
+- Convert SCENIC from a fixed-path script to a function with configurable databases,
+  correct filtering and correlation steps, and unique regulon metadata names.
+
 # biomed 0.3.1
 
 * Add biomed_colors() with the supplied 14 RGBA colors, preserving CC alpha.
