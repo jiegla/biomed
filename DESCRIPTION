@@ -42,6 +42,7 @@ Suggests:
     AUCell,
     BiocParallel,
     SCENIC,
+    RcisTarget,
     withr,
     ggdensity,
     ggsci,

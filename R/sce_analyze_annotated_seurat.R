@@ -384,6 +384,7 @@ sce_analyze_annotated_seurat <- function(
     }
     for (v in intersect(names(group_order), colnames(md))) {
       md[[v]] <- factor(md[[v]], levels = unique(c(group_order[[v]], as.character(md[[v]]))))
+      group_order[[v]] <- levels(md[[v]])
       seurat[[v]] <- md[[v]]
     }
   }

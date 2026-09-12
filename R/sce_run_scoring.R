@@ -28,7 +28,8 @@ sce_run_scoring <- function(sce, gene_sets, method = c("UCell", "GSVA", "AUCell"
   expr <- .biomed_sce_expression(sce, assay, layer)
   .biomed_require(method)
   scores <- switch(method,
-    UCell = as.matrix(UCell::ScoreSignatures_UCell(expr, features = gene_sets)),
+    UCell = as.matrix(UCell::ScoreSignatures_UCell(expr, features = gene_sets,
+      maxRank = min(1500L, nrow(expr)))),
     GSVA = {
       params <- GSVA::gsvaParam(as.matrix(expr), gene_sets, kcdf = "Gaussian")
       t(GSVA::gsva(params, verbose = FALSE, BPPARAM = BiocParallel::SerialParam()))
