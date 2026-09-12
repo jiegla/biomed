@@ -92,6 +92,7 @@ sce_analyze_annotated_seurat <- function(
 
   if (!inherits(seurat, "Seurat")) stop("`seurat` must be a Seurat object.")
 
+  statistic_level[statistic_level == "cells"] <- "cell"
   statistic_level <- unique(match.arg(
     statistic_level,
     choices = c("samples", "cell"),
@@ -204,16 +205,14 @@ sce_analyze_annotated_seurat <- function(
     }
     if (isTRUE(save_pdf)) {
       grDevices::pdf(paste0(filename_no_ext, ".pdf"), width = w, height = h)
-      draw_one()
-      grDevices::dev.off()
+      tryCatch(draw_one(), finally = grDevices::dev.off())
     }
     if (isTRUE(save_png)) {
       grDevices::png(
         paste0(filename_no_ext, ".png"),
         width = w, height = h, units = "in", res = 220
       )
-      draw_one()
-      grDevices::dev.off()
+      tryCatch(draw_one(), finally = grDevices::dev.off())
     }
   }
 
@@ -292,13 +291,11 @@ sce_analyze_annotated_seurat <- function(
     }
     if (isTRUE(save_pdf)) {
       grDevices::pdf(paste0(filename_no_ext, ".pdf"), width = d[1], height = d[2])
-      draw_one()
-      grDevices::dev.off()
+      tryCatch(draw_one(), finally = grDevices::dev.off())
     }
     if (isTRUE(save_png)) {
       grDevices::png(paste0(filename_no_ext, ".png"), width = d[1], height = d[2], units = "in", res = 220)
-      draw_one()
-      grDevices::dev.off()
+      tryCatch(draw_one(), finally = grDevices::dev.off())
     }
     invisible(NULL)
   }
@@ -493,16 +490,16 @@ sce_analyze_annotated_seurat <- function(
                              by = list(sample_comp[[sample_col]]), sum)
   names(sample_totals) <- c(sample_col, "sample_total_cells")
   sample_comp <- merge(sample_comp, sample_totals, by = sample_col, all.x = TRUE)
-  sample_comp$fraction <- with(sample_comp, .data$n_cells / .data$sample_total_cells)
+  sample_comp$fraction <- sample_comp$n_cells / sample_comp$sample_total_cells
   sample_comp$percent <- 100 * sample_comp$fraction
   sample_comp <- merge(sample_comp, sample_meta, by = sample_col, all.x = TRUE, sort = FALSE)
 
   sample_count_wide <- sample_comp |>
     dplyr::select(dplyr::all_of(c(sample_col, celltype, "n_cells"))) |>
-    tidyr::pivot_wider(names_from = dplyr::all_of(celltype), values_from = .data$n_cells, values_fill = 0)
+    tidyr::pivot_wider(names_from = dplyr::all_of(celltype), values_from = "n_cells", values_fill = 0)
   sample_fraction_wide <- sample_comp |>
     dplyr::select(dplyr::all_of(c(sample_col, celltype, "fraction"))) |>
-    tidyr::pivot_wider(names_from = dplyr::all_of(celltype), values_from = .data$fraction, values_fill = 0)
+    tidyr::pivot_wider(names_from = dplyr::all_of(celltype), values_from = "fraction", values_fill = 0)
 
   write_xlsx_safe(
     list(

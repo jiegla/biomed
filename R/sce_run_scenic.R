@@ -50,6 +50,10 @@ sce_run_scenic <- function(sce, db_dir, dbs = NULL, species = c("human", "mouse"
   setwd(output_dir)
   withr::local_seed(seed)
   cell_info <- sce[[]]
+  exprMat <- expr
+  cellInfo <- cell_info
+  save(exprMat, file = "exprMat_scenic.rda")
+  save(cellInfo, file = "cellInfo_scenic.rda")
   saveRDS(expr, "exprMat_scenic.rds")
   saveRDS(cell_info, "cellInfo_scenic.rds")
   options <- SCENIC::initializeScenic(org = if (species == "human") "hgnc" else "mgi",
@@ -71,6 +75,8 @@ sce_run_scenic <- function(sce, db_dir, dbs = NULL, species = c("human", "mouse"
   auc <- AUCell::getAUC(SCENIC::loadInt(options, "aucell_regulonAUC"))
   if (!all(colnames(sce) %in% colnames(auc))) stop("SCENIC AUC is missing cells.")
   auc <- auc[, colnames(sce), drop = FALSE]
+  regulonAUC <- auc
+  save(regulonAUC, file = "regulonAUC.rda")
   saveRDS(auc, "regulonAUC.rds")
   utils::write.csv(auc, "regulonAUC.csv")
   variance <- apply(auc, 1L, stats::var)

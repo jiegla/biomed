@@ -45,7 +45,7 @@ sce_analyze_annotated_seurat(
 \item{seurat}{An annotated Seurat object.}
 \item{clinical_var}{Clinical metadata columns for stratification. Each must be constant within a sample.}
 \item{celltype}{Metadata column containing cell-type annotations.}
-\item{statistic_level}{Use samples as independent units by default; cells requests exploratory cell-level comparisons.}
+\item{statistic_level}{Use samples as independent units by default; cell (or cells) requests exploratory cell-level comparisons.}
 \item{sample_col}{Sample identifier column in Seurat metadata.}
 \item{assay}{Assay to use. NULL uses the default assay; SCENIC defaults to RNA.}
 \item{layer}{Expression layer to use; data denotes normalized expression. Split Seurat v5 layers are joined on a local copy.}
