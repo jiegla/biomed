@@ -1,3 +1,18 @@
+# biomed 0.5.0
+
+- Add four spatial transcriptomics workflows with `vis_` names and matching
+  source files: cell-type composition, niche pathway scores, spatial gene
+  comparisons and neural-signaling analysis.
+- Preserve sample-level summaries, paired niche comparisons, full cell-type
+  fraction denominators, mixed-effects tests, figures and report exports.
+- Parameterize neural analysis inputs, cohort selection, metadata columns,
+  assay/layer and gene signatures; return reusable results and plots.
+- Align split Seurat layers by spot names, validate abundance inputs, treat
+  non-finite pathway scores as missing and count only finite matched pairs.
+- Failed mixed-model fits return missing P values with model messages;
+  nonconverged fits are not used for inference.
+- Add synthetic regression tests and spatial workflow usage documentation.
+
 # biomed 0.4.0
 
 - Add six single-cell workflows with consistent `sce_` names and matching R files.
