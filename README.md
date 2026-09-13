@@ -13,6 +13,66 @@ publication-ready tables and figures.
 > `biomed` is for research use only. It is not medical advice and is not a
 > validated clinical decision-support system.
 
+## Spatial transcriptomics workflows (0.5.0)
+
+The `vis_` prefix identifies spatial transcriptomics utilities; `sce_` remains
+reserved for single-cell workflows. Each exported function has a matching file
+under `R/` and an R help page.
+
+| Function | Purpose |
+| --- | --- |
+| `vis_analyze_celltype_composition()` | Sample-level cell-type fractions or abundances, mixed-effects global tests and paired/unpaired comparisons |
+| `vis_analyze_niche_pathway_scores()` | Spot-aligned score RDS files, sample/niche summaries and paired pathway comparisons |
+| `vis_compare_spatial_gene_expression_groups()` | Sample/region expression summaries, clinical comparisons, spatial plots, Moran's I and cell2location correlations |
+| `vis_analyze_neural_signaling_spatial()` | Neural gene expression, relative signature scores and sample-level condition comparisons |
+
+```r
+# vis is your spatial Seurat object; adapt metadata columns to your data.
+# Full denominator is retained when selecting a subset of cell types.
+composition <- vis_analyze_celltype_composition(
+  vis, group_cols = "region", sample_col = "sample_id",
+  celltype_cols = "T_cell", all_celltype_cols = c("T_cell", "B_cell", "Stromal"),
+  outdir = "results/composition"
+)
+
+pathways <- vis_analyze_niche_pathway_scores(
+  vis, group_col = "region", sample_col = "sample_id",
+  score_dir = "pathway_scores", selected_rds = "scores.rds",
+  outdir = "results/pathways"
+)
+
+expression <- vis_compare_spatial_gene_expression_groups(
+  vis, genes = c("ADRA1A", "ADRB1"), statistic_group = "condition",
+  sample_col = "sample_id", assay = "RNA", layer = "data",
+  split_by_region = "region", output_dir = "results/spatial_genes"
+)
+
+neural <- vis_analyze_neural_signaling_spatial(
+  vis, condition_col = "condition", sample_col = "sample_id",
+  region_col = "region", assay = "RNA", layer = "data", output_dir = NULL
+)
+neural$condition_tests
+neural$plots$heatmap
+```
+
+The first three workflows preserve report-producing behavior: they create output
+directories and overwrite report files. Neural analysis writes only when
+`output_dir` is supplied. Optional packages are checked when a workflow is called;
+`nlme` is needed for composition and niche-score mixed models.
+
+Clinical grouping columns must be constant within each sample. Neural analysis no
+longer reads a fixed RDS or assumes a specific disease/cohort; use `project_col`
+and `project` to select a cohort before scoring when needed. Its 12 default neural
+signatures are inherited from the contributed script; scores are averages of
+variable-gene z-scores and are not GSEA NES. Regions are descriptive in neural
+analysis, while niche comparisons explicitly match samples across regions.
+Numeric score-RDS columns must contain pathway scores only, with spot names as
+row names. Non-finite scores are treated as missing. Mixed models that fail to
+converge return missing P values and an explanatory `model_message`.
+
+The original spatial expression usage guide, adapted to the package interface,
+is in [inst/guides/vis_spatial_gene_expression.md](inst/guides/vis_spatial_gene_expression.md).
+
 ## Built-in colors and survival export
 
 `biomed_colors()` returns the 14 package colors in their supplied order,
@@ -332,4 +392,4 @@ and expression layer are explicit; matching gene symbols and motif annotations a
 The full workflow can require substantial memory because SCENIC uses a dense expression matrix.
 CI checks input handling; full regulatory-network validation requires external ranking
 and annotation resources and is not covered by the small synthetic tests.
-GSVA uses the current [parameter-object API](https://bioconductor.org/packages/release/bioc/vignettes/GSVA/inst/doc/GSVA.html).
+GSVA uses the current [parameter-object API](https://bioconductor.org/packages/release/bioc/vignettes/GSVA/inst/guides/GSVA.html).

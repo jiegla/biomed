@@ -1,6 +1,6 @@
 Package: biomed
 Title: Clinical and Biomedical Research Utilities
-Version: 0.4.0
+Version: 0.5.0
 Authors@R:
     person("Guangling", "Jie", , "104247086+jiegla@users.noreply.github.com",
            role = c("aut", "cre"))
@@ -14,7 +14,6 @@ URL: https://github.com/jiegla/biomed
 BugReports: https://github.com/jiegla/biomed/issues
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
 Depends:
     R (>= 4.3.0)
 Imports:
@@ -29,6 +28,8 @@ Suggests:
     Seurat (>= 5.0.0),
     SeuratObject (>= 5.0.0),
     Matrix,
+    nlme,
+    ape,
     dplyr,
     tidyr,
     tidyselect,
@@ -58,3 +59,4 @@ VignetteBuilder: knitr
 Remotes:
     aertslab/SCENIC,
     aertslab/RcisTarget
+Config/roxygen2/version: 8.0.0
