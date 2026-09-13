@@ -3,8 +3,11 @@ sce_fixture <- function() {
   set.seed(71)
   genes <- unique(c("G1", "G2", Seurat::cc.genes.updated.2019$s.genes,
                     Seurat::cc.genes.updated.2019$g2m.genes, paste0("BG", 1:600)))
-  counts <- matrix(rpois(length(genes) * 40, 4), length(genes), 40,
-                   dimnames = list(genes, paste0("c", 1:40)))
+  counts <- Matrix::Matrix(
+    matrix(rpois(length(genes) * 40, 4), length(genes), 40,
+           dimnames = list(genes, paste0("c", 1:40))),
+    sparse = TRUE
+  )
   x <- SeuratObject::CreateSeuratObject(counts)
   x$orig.ident <- rep(c("001", "002", "003", "004"), each = 10)
   x$group <- rep(c("A", "B"), each = 20)
@@ -50,7 +53,8 @@ test_that("UTF-8 and GB18030 metadata are decoded without losing sample IDs", {
 test_that("expression helper selects the requested assay and rejoins split layers", {
   x <- sce_fixture()
   expected <- biomed:::.biomed_sce_expression(x)
-  x[["ALT"]] <- SeuratObject::CreateAssay5Object(data = expected + 2)
+  alt <- methods::as(expected + 2, "dgCMatrix")
+  x[["ALT"]] <- SeuratObject::CreateAssay5Object(counts = alt, data = alt)
   expect_equal(as.matrix(biomed:::.biomed_sce_expression(x, "ALT")), as.matrix(expected + 2))
   x[["RNA"]] <- split(x[["RNA"]], f = x$group)
   expect_equal(as.matrix(biomed:::.biomed_sce_expression(x)), as.matrix(expected))
@@ -59,7 +63,8 @@ test_that("expression helper selects the requested assay and rejoins split layer
 test_that("gene comparisons aggregate the selected assay at sample level", {
   x <- sce_fixture()
   mat <- biomed:::.biomed_sce_expression(x)
-  x[["ALT"]] <- SeuratObject::CreateAssay5Object(data = mat + 2)
+  alt <- methods::as(mat + 2, "dgCMatrix")
+  x[["ALT"]] <- SeuratObject::CreateAssay5Object(counts = alt, data = alt)
   result <- sce_compare_gene_expression_groups(x, "G1", "group", assay = "ALT",
     output_dir = tempfile(), save_pdf = FALSE, save_png = FALSE)
   dat <- result$group$analysis_data
@@ -86,8 +91,10 @@ test_that("all scoring backends return cell-aligned signature scores", {
   x <- sce_fixture()
   sets <- list(one = rownames(x)[1:25], two = rownames(x)[26:50])
   for (method in c("UCell", "GSVA", "AUCell")) {
-    expect_true(requireNamespace(method, quietly = TRUE))
-    scores <- sce_run_scoring(x, sets, method = method, return_type = "matrix")
+    expect_true(suppressWarnings(requireNamespace(method, quietly = TRUE)))
+    scores <- suppressWarnings(
+      sce_run_scoring(x, sets, method = method, return_type = "matrix")
+    )
     expect_equal(dim(scores), c(40L, 2L))
     expect_identical(rownames(scores), colnames(x))
     expect_true(all(is.finite(scores)))
