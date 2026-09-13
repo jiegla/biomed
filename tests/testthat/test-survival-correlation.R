@@ -144,3 +144,14 @@ test_that("new exports write readable results and composite survival plots", {
   expect_true(file.exists(file.path(path, "1-time-marker-correlation.pdf")))
   expect_length(list.files(path, pattern = "RData$"), 0)
 })
+
+test_that("surv_fig_hr validates batch column names clearly", {
+  d <- data.frame(PFS = c(2, 4, 6, 8), PFS_status = c(1, 0, 1, 0),
+                  group = c("A", "A", "B", "B"))
+  expect_error(surv_fig_hr("", d, time = "PFS", status = "PFS_status"),
+               "group_var")
+  expect_error(surv_fig_hr("not_a_column", d, time = "PFS", status = "PFS_status"),
+               "Missing: not_a_column")
+  expect_error(surv_fig_hr("group", d, time = "PFS", status = "missing_status"),
+               "Missing: missing_status")
+})

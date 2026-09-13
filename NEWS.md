@@ -1,3 +1,8 @@
+# biomed 0.4.1
+
+- Report empty and missing survival column names explicitly in `surv_fig_hr()`
+  and shared column validation, including the available data columns.
+
 # biomed 0.4.0
 
 - Add six single-cell workflows with consistent `sce_` names and matching R files.
