@@ -267,3 +267,69 @@ devtools::check()
 ## License
 
 MIT © 2026 Guangling Jie
+
+## Single-cell and Seurat workflows
+
+All public single-cell functions start with `sce_`; each R filename matches its function.
+
+| Original script/function | biomed function |
+| --- | --- |
+| add_seurat_metadata | sce_add_seurat_metadata |
+| analyze_annotated_seurat | sce_analyze_annotated_seurat |
+| compare_gene_expression_groups | sce_compare_gene_expression_groups |
+| run_sce_scoring | sce_run_scoring |
+| run_scenic script | sce_run_scenic |
+| sce_cell_cycle | sce_cell_cycle |
+
+```r
+sce <- biomed::sce_add_seurat_metadata(sce, "clinical.csv", file_encoding = "UTF-8")
+sce <- biomed::sce_cell_cycle(sce, species = "human", assay = "RNA")
+sce <- biomed::sce_run_scoring(sce, gene_sets, method = "UCell")
+comparison <- biomed::sce_compare_gene_expression_groups(
+  sce, genes = c("CD3D", "MS4A1"), statistic_group = "group",
+  split_by_celltype = "celltype", statistic_level = "samples")
+summary <- biomed::sce_analyze_annotated_seurat(
+  sce, celltype = "celltype", clinical_var = "group")
+```
+
+Install Seurat and the reporting dependencies for these workflows. Scoring uses optional
+Bioconductor packages `UCell`, `GSVA` (>= 1.50.0), `AUCell`, and `BiocParallel`:
+
+```r
+install.packages(c("Seurat", "dplyr", "tidyr", "tidyselect", "readxl", "readr",
+                   "patchwork", "pheatmap", "gplots", "openxlsx", "withr"))
+BiocManager::install(c("UCell", "GSVA", "AUCell", "BiocParallel"))
+```
+
+Metadata files use the first column as sample IDs. All Seurat samples must match by default;
+extra file samples are ignored. `strict_match = TRUE` requires equal sample sets.
+`allow_missing = TRUE` explicitly restores the uploaded script's NA-fill behavior.
+Existing columns receive `.new` suffixes unless `replace_sample = TRUE`.
+CSV leading-zero identifiers are preserved. `cols` retains tidyselect syntax.
+
+Expression comparisons default to **samples as independent units**. Cell-level tests remain
+available, but do not account for correlations between cells from the same sample.
+The reporting functions retain PDF/PNG figures, XLSX tables and the contributed CSV/RDS
+analysis exports. The annotation workflow defaults to `biomed_colors()`.
+See each function's R help for marker, correlation, export and aggregation controls.
+
+### SCENIC requirements
+
+Install [SCENIC](https://github.com/aertslab/SCENIC) and its dependencies separately, and
+obtain species-compatible cisTarget ranking databases before calling:
+
+```r
+remotes::install_github(c("aertslab/RcisTarget", "aertslab/SCENIC"))
+result <- biomed::sce_run_scenic(sce, db_dir = "/path/to/cisTarget",
+  dbs = c("compatible-ranking-database.feather"), species = "human",
+  output_dir = "scenic_output", n_cores = 8)
+sce <- result$sce
+```
+
+SCENIC exports regulon AUC, the updated object, metadata-name mapping, feature plots and
+cell-type mean AUC heatmaps. It never runs while loading biomed. The database directory
+and expression layer are explicit; matching gene symbols and motif annotations are required.
+The full workflow can require substantial memory because SCENIC uses a dense expression matrix.
+CI checks input handling; full regulatory-network validation requires external ranking
+and annotation resources and is not covered by the small synthetic tests.
+GSVA uses the current [parameter-object API](https://bioconductor.org/packages/release/bioc/vignettes/GSVA/inst/doc/GSVA.html).

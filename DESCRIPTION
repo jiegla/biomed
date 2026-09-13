@@ -1,6 +1,6 @@
 Package: biomed
 Title: Clinical and Biomedical Research Utilities
-Version: 0.3.1
+Version: 0.4.0
 Authors@R:
     person("Guangling", "Jie", , "104247086+jiegla@users.noreply.github.com",
            role = c("aut", "cre"))
@@ -26,6 +26,24 @@ Imports:
     survival,
     tibble
 Suggests:
+    Seurat (>= 5.0.0),
+    SeuratObject (>= 5.0.0),
+    Matrix,
+    dplyr,
+    tidyr,
+    tidyselect,
+    readxl,
+    readr,
+    patchwork,
+    pheatmap,
+    gplots,
+    UCell,
+    GSVA (>= 1.50.0),
+    AUCell,
+    BiocParallel,
+    SCENIC,
+    RcisTarget,
+    withr,
     ggdensity,
     ggsci,
     knitr,
@@ -37,3 +55,6 @@ Suggests:
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 VignetteBuilder: knitr
+Remotes:
+    aertslab/SCENIC,
+    aertslab/RcisTarget
