@@ -105,11 +105,19 @@
 }
 
 .biomed_required_columns <- function(data, columns) {
+  if (!is.character(columns) || anyNA(columns)) {
+    cli::cli_abort("Column names must be a character vector without missing values.")
+  }
+  empty <- !nzchar(trimws(columns))
+  if (any(empty)) {
+    cli::cli_abort("Column names must not be empty or contain only whitespace.")
+  }
   missing <- setdiff(columns, names(data))
   if (length(missing) > 0L) {
     cli::cli_abort(c(
       "Required columns are missing.",
-      "x" = "Missing: {missing}."
+      "x" = "Missing: {paste(missing, collapse = ', ')}.",
+      "i" = "Available columns: {paste(names(data), collapse = ', ')}."
     ))
   }
   invisible(TRUE)

@@ -7,6 +7,16 @@
 surv_fig_hr <- function(group_var, df, max_time = 60, time = "OS",
                         status = "Survival_status", hr = "yes", cols = NULL,
                         x.label = "Months", output_dir = "Surv_Output", ...) {
+  column_args <- list(group_var = group_var, time = time, status = status)
+  valid_column <- vapply(column_args, function(x) {
+    is.character(x) && length(x) == 1L && !is.na(x) && nzchar(trimws(x))
+  }, logical(1))
+  if (any(!valid_column)) {
+    bad <- names(column_args)[!valid_column]
+    stop("Column-name arguments must be nonempty. Invalid argument(s): ",
+         paste(bad, collapse = ", "), ".")
+  }
+  .biomed_required_columns(df, unname(unlist(column_args, use.names = FALSE)))
   if (is.null(cols) || !length(cols) || all(is.na(cols))) {
     cols <- NULL
   } else {
