@@ -28,7 +28,8 @@ surv_fig_hr <- function(group_var, df, max_time = 60, time = "OS",
   if (!is.null(output_dir)) {
     dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
     file <- file.path(output_dir, paste0(format(Sys.time(), "%Y%m%d_%H%M%S_"),
-                                         sanitize_filename(time), "_", sanitize_filename(group_var),\n                                         "_Output.txt"))
+                                         sanitize_filename(time), "_",
+                                         sanitize_filename(group_var), "_Output.txt"))
     writeLines(utils::capture.output(print(attr(gp, "statistics"))), file)
   }
   gp
