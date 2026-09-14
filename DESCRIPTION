@@ -1,6 +1,6 @@
 Package: biomed
 Title: Clinical and Biomedical Research Utilities
-Version: 0.4.2
+Version: 0.5.0
 Authors@R:
     person("Guangling", "Jie", , "104247086+jiegla@users.noreply.github.com",
            role = c("aut", "cre"))
@@ -21,6 +21,7 @@ Imports:
     cli,
     ggplot2 (>= 3.4.0),
     grid,
+    methods,
     rlang,
     scales,
     survival,
@@ -44,6 +45,17 @@ Suggests:
     SCENIC,
     RcisTarget,
     withr,
+    purrr,
+    writexl,
+    yaml,
+    clusterProfiler,
+    AnnotationDbi,
+    org.Hs.eg.db,
+    scTenifoldKnk,
+    enrichR,
+    ggrepel,
+    FNN,
+    viridisLite,
     ggdensity,
     ggsci,
     knitr,
@@ -53,6 +65,8 @@ Suggests:
     survminer,
     VennDiagram,
     testthat (>= 3.0.0)
+Enhances:
+    qs
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 Remotes:

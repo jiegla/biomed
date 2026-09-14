@@ -1,3 +1,14 @@
+# biomed 0.5.0
+
+- Correct sample-expression summary selection so each sample retains its own mean/median.
+
+- Add six contributed single-cell/spatial workflows with `sce_` names and matching R files.
+- Preserve cell-fraction Excel export, sample/cell expression tests, DEG/ORA/GSEA exports,
+  virtual-KO reports and continuous spatial/pathway maps.
+- Make optional dependencies explicit; remove script-level package attachment and sourcing.
+- Support old and new scTenifoldKnk QC argument names and restore caller RNG state.
+- Fix case-insensitive literal pathway matching and validate degenerate spatial inputs.
+
 # biomed 0.4.2
 
 - Include the survival endpoint column before the grouping variable in timestamped
@@ -70,3 +81,4 @@
   diagrams.
 * Hardened binary-outcome handling, missing-data checks, sparse-table tests,
   multi-level Cox contrasts, and opt-in file output.
+

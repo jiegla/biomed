@@ -333,3 +333,75 @@ The full workflow can require substantial memory because SCENIC uses a dense exp
 CI checks input handling; full regulatory-network validation requires external ranking
 and annotation resources and is not covered by the small synthetic tests.
 GSVA uses the current [parameter-object API](https://bioconductor.org/packages/release/bioc/vignettes/GSVA/inst/doc/GSVA.html).
+
+
+## Additional single-cell and spatial workflows
+
+These six contributed workflows use matching `sce_` function and R filenames.
+The existing six single-cell functions are unchanged.
+
+| Function | Preserved outputs |
+| --- | --- |
+| `sce_calculate_cell_fraction()` | Cell counts/fractions and default XLSX export |
+| `sce_gene_expression_statistic()` | Sample/cell summaries, omnibus/pairwise tests, XLSX/CSV, RDS, PNG/PDF |
+| `sce_run_two_group_deg_enrichment()` | Seurat DEG, GMT ORA/GSEA, per-cell-type Excel/RDA objects and plots |
+| `sce_run_scTenifoldKnk_KO()` | Single/multiple virtual KOs, perturbation tables, figures, TXT summaries and RDS bundles |
+| `sce_plot_spatial_continuous()` | Smoothed expression/metadata surfaces, H&E, contours, masks and plot data |
+| `sce_plot_pathway_rds_continuous()` | Batch pathway maps across RDS files/images, summary and plotting logs |
+
+The uploaded `vis_plot_*.R` scripts are exposed as `sce_plot_*` to follow the
+package's single-cell prefix convention. Existing argument names and default
+exports are retained. Use `?function_name` for full parameter documentation.
+
+```r
+fractions <- sce_calculate_cell_fraction(
+  sce, sample_col = "orig.ident", celltype_col = "celltype_major"
+)
+expression <- sce_gene_expression_statistic(
+  sce, genes = c("CD3D", "MS4A1"), sample_col = "orig.ident",
+  celltype_col = "celltype_major", group_col = "condition",
+  output_dir = "expression_report"
+)
+deg <- sce_run_two_group_deg_enrichment(
+  sce, group_col = "condition", ident_1 = "treated", ident_2 = "control",
+  celltype_col = "celltype_major", output_dir = "deg_report",
+  run_ora = FALSE, run_gsea = FALSE
+)
+# To enable ORA/GSEA, supply gmt_files or gmt_dir and enable the corresponding flags.
+# Example configuration:
+system.file("examples", "sce_deg_config.yml", package = "biomed")
+
+ko <- sce_run_scTenifoldKnk_KO(
+  sce, gKO = "CASP4", subset_col = "celltype_major",
+  subset_values = "Macrophage", layer = "counts", nCores = 2
+)
+p <- sce_plot_spatial_continuous(
+  spatial, feature = "CD3D", colors = biomed_colors(),
+  save_path = "spatial/CD3D.png"
+)
+maps <- sce_plot_pathway_rds_continuous(
+  spatial, score_dir = "gmt_pathway_scores", keep_plots = TRUE
+)
+```
+
+Dependencies are optional and checked at use time. Install `scTenifoldKnk` for
+virtual KO, `FNN`/`viridisLite` for spatial smoothing, `writexl` for the
+gene-expression Excel report (otherwise CSV), and `openxlsx` for the other Excel
+exports. GMT enrichment requires `clusterProfiler` from Bioconductor;
+gene-ID conversion additionally needs `AnnotationDbi` and the configured OrgDb.
+YAML input requires `yaml`. Legacy QS input is retained when `qs` is installed.
+The [qs maintainer](https://github.com/qsbase/qs2/issues/24) has deprecated it;
+it is unavailable on CRAN and does not support R 4.6. It is therefore declared
+as a legacy `Enhances` dependency rather than required for package checks.
+On a compatible older R installation, read existing QS files with `qs::qread()`
+and save them with `saveRDS()` for current R. `qs2` cannot read the old QS format.
+
+Sample-level gene-expression tests use one summary per sample. Cell-level tests
+and Seurat FindMarkers do not model within-sample dependence. With
+`remove_zero = TRUE`, filtering precedes summaries and minimum-cell thresholds.
+Virtual KO requires raw counts; its FC statistic is a perturbation measure, not
+signed expression log2FC. The original QC arguments are adapted to the
+[scTenifoldKnk API](https://cran.r-project.org/web/packages/scTenifoldKnk/refman/scTenifoldKnk.html);
+version 1.1 uses a cell fraction for the minimum gene-detection QC threshold.
+Enrichr requests occur only when enrichment or network annotation is enabled.
+Inspect returned DEG status tables and pathway plotting logs for skipped/failed steps.

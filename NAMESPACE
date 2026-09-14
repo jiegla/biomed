@@ -42,3 +42,11 @@ export(sce_compare_gene_expression_groups)
 export(sce_run_scoring)
 export(sce_run_scenic)
 export(sce_cell_cycle)
+
+export(sce_calculate_cell_fraction)
+export(sce_gene_expression_statistic)
+export(sce_run_two_group_deg_enrichment)
+export(sce_run_scTenifoldKnk_KO)
+export(sce_plot_spatial_continuous)
+export(sce_plot_pathway_rds_continuous)
+
