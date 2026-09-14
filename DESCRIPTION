@@ -47,7 +47,6 @@ Suggests:
     purrr,
     writexl,
     yaml,
-    qs,
     clusterProfiler,
     AnnotationDbi,
     org.Hs.eg.db,
@@ -65,9 +64,10 @@ Suggests:
     survminer,
     VennDiagram,
     testthat (>= 3.0.0)
+Enhances:
+    qs
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 Remotes:
     aertslab/SCENIC,
     aertslab/RcisTarget
-

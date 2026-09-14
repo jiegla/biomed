@@ -254,7 +254,9 @@ sce_run_scTenifoldKnk_KO <- function(
       return(readRDS(x))
     }
     if (ext == "qs") {
-      require_pkg("qs")
+      if (!requireNamespace("qs", quietly = TRUE)) {
+        stop("Legacy .qs input requires 'qs' on a compatible older R version. Read it there with qs::qread() and saveRDS() for current R; qs2 cannot read this format.")
+      }
       return(qs::qread(x))
     }
 
@@ -1369,4 +1371,3 @@ sce_run_scTenifoldKnk_KO <- function(
   }
   args
 }
-

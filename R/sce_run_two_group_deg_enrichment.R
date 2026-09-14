@@ -129,7 +129,7 @@
 
   if (identical(ext, "qs")) {
     if (!requireNamespace("qs", quietly = TRUE)) {
-      stop("Package 'qs' is required for .qs files.")
+      stop("Legacy .qs input requires 'qs' on a compatible older R version. Read it there with qs::qread() and saveRDS() for current R; qs2 cannot read this format.")
     }
     obj <- qs::qread(input)
   } else if (identical(ext, "rds")) {
@@ -1210,4 +1210,3 @@ sce_run_two_group_deg_enrichment <- function(
   message("Completed. Results written to: ", normalizePath(out_dir, winslash = "/", mustWork = FALSE))
   invisible(results)
 }
-

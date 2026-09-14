@@ -389,7 +389,12 @@ virtual KO, `FNN`/`viridisLite` for spatial smoothing, `writexl` for the
 gene-expression Excel report (otherwise CSV), and `openxlsx` for the other Excel
 exports. GMT enrichment requires `clusterProfiler` from Bioconductor;
 gene-ID conversion additionally needs `AnnotationDbi` and the configured OrgDb.
-YAML and QS input require `yaml` and `qs`, respectively.
+YAML input requires `yaml`. Legacy QS input is retained when `qs` is installed.
+The [qs maintainer](https://github.com/qsbase/qs2/issues/24) has deprecated it;
+it is unavailable on CRAN and does not support R 4.6. It is therefore declared
+as a legacy `Enhances` dependency rather than required for package checks.
+On a compatible older R installation, read existing QS files with `qs::qread()`
+and save them with `saveRDS()` for current R. `qs2` cannot read the old QS format.
 
 Sample-level gene-expression tests use one summary per sample. Cell-level tests
 and Seurat FindMarkers do not model within-sample dependence. With
@@ -400,4 +405,3 @@ signed expression log2FC. The original QC arguments are adapted to the
 version 1.1 uses a cell fraction for the minimum gene-detection QC threshold.
 Enrichr requests occur only when enrichment or network annotation is enabled.
 Inspect returned DEG status tables and pathway plotting logs for skipped/failed steps.
-
