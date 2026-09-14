@@ -245,11 +245,11 @@ sce_gene_expression_statistic <- function(
       .groups = "drop"
     ) |>
     dplyr::mutate(
-      expression_value = ifelse(
-        sample_summary_method == "mean",
-        mean_expression,
-        median_expression
-      )
+      expression_value = if (sample_summary_method == "mean") {
+        .data$mean_expression
+      } else {
+        .data$median_expression
+      }
     )
   
   #============================================================

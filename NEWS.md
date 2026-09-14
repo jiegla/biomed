@@ -1,5 +1,7 @@
 # biomed 0.5.0
 
+- Correct sample-expression summary selection so each sample retains its own mean/median.
+
 - Add six contributed single-cell/spatial workflows with `sce_` names and matching R files.
 - Preserve cell-fraction Excel export, sample/cell expression tests, DEG/ORA/GSEA exports,
   virtual-KO reports and continuous spatial/pathway maps.

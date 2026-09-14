@@ -3,7 +3,7 @@ additional_sce_fixture <- function(ncells = 40L) {
   counts <- matrix(rep(seq_len(30), ncells), nrow = 30,
                    dimnames = list(paste0("G", 1:30), paste0("cell", seq_len(ncells))))
   counts[1, ] <- rep(c(0, 1, 3, 7), length.out = ncells)
-  x <- SeuratObject::CreateSeuratObject(counts)
+  x <- SeuratObject::CreateSeuratObject(Matrix::Matrix(counts, sparse = TRUE))
   x$sampleid <- rep(paste0("s", 1:4), length.out = ncells)
   x$condition <- ifelse(x$sampleid %in% c("s1", "s2"), "A", "B")
   x$celltype <- rep(rep(c("T", "B"), each = 4), length.out = ncells)
@@ -17,7 +17,7 @@ test_that("cell fractions preserve the original schema and Excel export", {
   out <- sce_calculate_cell_fraction(x, file, "sampleid", "celltype")
   expect_named(out, c("orig.ident", "celltype_major", "cell_number", "fraction"))
   expect_equal(sum(out$cell_number), ncol(x))
-  expect_equal(unname(tapply(out$fraction, out$orig.ident, sum)), rep(1, 4))
+  expect_equal(as.numeric(tapply(out$fraction, out$orig.ident, sum)), rep(1, 4))
   expect_true(file.exists(file))
   expect_equal(nrow(openxlsx::read.xlsx(file)), nrow(out))
 })
@@ -34,6 +34,11 @@ test_that("expression statistics use sample summaries and preserve reporting mod
                         list(sample_id = x$sampleid, celltype = x$celltype), mean)
   joined <- merge(as.data.frame(r$sample_summary), expected, by = c("sample_id", "celltype"))
   expect_equal(joined$expression_value, joined$x)
+  median_args <- args
+  median_args$sample_summary_method <- "median"
+  median_result <- do.call(sce_gene_expression_statistic, median_args)
+  expect_equal(median_result$sample_summary$expression_value,
+               median_result$sample_summary$median_expression)
   expect_equal(nrow(r$analysis_data), 8L)
   expect_equal(r$overall_statistics$p_adjust_global,
                p.adjust(r$overall_statistics$p_value, "BH"))
