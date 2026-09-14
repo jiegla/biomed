@@ -1,0 +1,46 @@
+# Override only needed settings; unspecified fields keep their defaults.
+output_dir: results/two_group_deg_enrichment
+project_name: group1_vs_group2
+seed: 1234
+de:
+  assay: RNA
+  slot: data
+  test_use: wilcox
+  test_logfc_threshold: 0
+  min_pct: 0.01
+  min_cells_per_group: 20
+  join_layers: true
+  prep_sct: false
+thresholds:
+  fc: 1
+  pvalue: 0.05
+  p_column: p_val_adj
+gene_id:
+  de_id: SYMBOL
+  gmt_id: SYMBOL
+  orgdb: org.Hs.eg.db
+  strip_ensembl_version: true
+gmt:
+  dir: null
+  files: null
+  pattern: '\.gmt$'
+  recursive: false
+ora:
+  run: true
+  directions: [Up, Down, All]
+  min_gs_size: 10
+  max_gs_size: 500
+gsea:
+  run: true
+  by: fgsea
+  min_gs_size: 10
+  max_gs_size: 500
+plot:
+  run: true
+  show_n: 20
+  formats: [png, pdf]
+export:
+  write_excel: true
+  write_rda: true
+  row_names: false
+

@@ -1,6 +1,6 @@
 Package: biomed
 Title: Clinical and Biomedical Research Utilities
-Version: 0.4.2
+Version: 0.5.0
 Authors@R:
     person("Guangling", "Jie", , "104247086+jiegla@users.noreply.github.com",
            role = c("aut", "cre"))
@@ -44,6 +44,18 @@ Suggests:
     SCENIC,
     RcisTarget,
     withr,
+    purrr,
+    writexl,
+    yaml,
+    qs,
+    clusterProfiler,
+    AnnotationDbi,
+    org.Hs.eg.db,
+    scTenifoldKnk,
+    enrichR,
+    ggrepel,
+    FNN,
+    viridisLite,
     ggdensity,
     ggsci,
     knitr,
@@ -58,3 +70,4 @@ VignetteBuilder: knitr
 Remotes:
     aertslab/SCENIC,
     aertslab/RcisTarget
+
