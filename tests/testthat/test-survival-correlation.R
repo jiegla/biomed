@@ -126,6 +126,11 @@ test_that("survival plots retain risk tables, medians and named comparisons", {
   expect_equal(attr(p, "statistics")$comparisons$hr, pairwise_survival(two, "group")$hr)
   old <- surv_fig_hr("group", two, time = "time", status = "status", output_dir = NULL)
   expect_s3_class(old, "ggsurvplot")
+  path <- tempfile()
+  on.exit(unlink(path, recursive = TRUE), add = TRUE)
+  surv_fig_hr("group", two, time = "time", status = "status", output_dir = path)
+  legacy_txt <- list.files(path, pattern = "_time_group_Output\\.txt$")
+  expect_length(legacy_txt, 1L)
 })
 
 test_that("new exports write readable results and composite survival plots", {

@@ -1,3 +1,8 @@
+# biomed 0.4.2
+
+- Include the survival endpoint column before the grouping variable in timestamped
+  `surv_fig_hr()` text filenames, for example `PFS_treatment_Output.txt`.
+
 # biomed 0.4.1
 
 - Report empty and missing survival column names explicitly in `surv_fig_hr()`
