@@ -39,4 +39,18 @@ sce_gene_expression_statistic(
 \value{A list containing parameters, genes_found, genes_not_found, expression_long, sample_summary, analysis_data, descriptive_statistics, overall_statistics, pairwise_statistics and plots.}
 \description{Summarize gene expression by sample or by cell, perform omnibus and pairwise tests, and optionally export reports and faceted plots.}
 \details{Sample-level analysis (the default) tests one mean or median per sample and cell type. Cell-level analysis treats cells as observations and does not model their dependence within samples. Two groups use an unpaired Wilcoxon test; more groups use Kruskal-Wallis, with pairwise Wilcoxon tests. Adjusted P values are provided within gene and globally; pairwise results additionally adjust within gene and cell type. Differences are group2 minus group1. With remove_zero = TRUE, nonpositive cells are removed before summaries and min_cells filtering, so detection fractions then describe the retained positive cells. Exports include an Excel workbook when writexl is available (otherwise CSV tables), analysis-data and expression-long RDS files, and one PNG/PDF plot per gene.}
-
+\examples{
+\dontrun{
+sce <- readRDS("annotated_seurat.rds")
+result <- sce_gene_expression_statistic(
+  sce,
+  genes = c("PDCD1", "LAG3"),
+  sample_col = "orig.ident",
+  celltype_col = "celltype",
+  group_col = "response",
+  statistic_by = "sample_level",
+  output_dir = "gene_expression_statistics"
+)
+result$overall_statistics
+}
+}
