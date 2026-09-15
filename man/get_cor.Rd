@@ -7,7 +7,6 @@ get_cor(
     var1,
     var2,
     is.matrix = FALSE,
-
     scale = TRUE,
     subtype = NULL,
     na.subtype.rm = FALSE,
@@ -33,15 +32,12 @@ get_cor(
     fig.width = 7,
     fig.height = 7.3,
     add.hdr.line = FALSE,
-
     remove.x.zero = FALSE,
     remove.y.zero = FALSE,
-
     point.fill = "lightblue",
     point.color = "black",
     point.shape = 21,
     stroke = 0.5,
-
     add.regress = TRUE,
     save_data = TRUE
 )
@@ -88,3 +84,14 @@ get_cor(
 \description{Compute correlation and plot the same filtered observations. Original zero values and missing groups are filtered before scaling and testing. Prefer plot_correlation for standardized names.}
 \value{A ggplot invisibly, with a correlation attribute containing x, y, method, n, estimate and p_value. Insufficient or constant data warns and returns NULL. NULL df returns NULL.}
 \details{Correlation is computed across all retained observations. In grouped plots, regression lines are fitted separately within each group. Numeric factor labels are converted to their numeric values. Non-numeric values and infinities cause an error.}
+\examples{
+\dontrun{
+biomarker <- data.frame(
+  PD_L1 = c(1, 5, 10, 20, 30, 50, 70, 90),
+  TMB = c(2.1, 2.4, 3.2, 4.0, 5.1, 6.2, 7.0, 8.4),
+  arm = rep(c("A", "B"), 4)
+)
+get_cor(biomarker, var1 = "PD_L1", var2 = "TMB", subtype = "arm",
+  scale = FALSE, show_plot = FALSE, save_plot = FALSE)
+}
+}
