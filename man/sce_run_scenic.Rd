@@ -31,3 +31,16 @@ sce_run_scenic(sce, db_dir, dbs = NULL, species = c("human", "mouse"),
 }
 \description{Single-cell utility adapted from the contributed workflow, with explicit package dependencies and cell alignment.}
 \value{Invisibly, a list with the updated Seurat object, SCENIC options, regulon AUC, retained genes, metadata-name mapping, mean AUC and output directory.}
+\examples{
+\dontrun{
+sce <- readRDS("annotated_seurat.rds")
+scenic <- sce_run_scenic(
+  sce,
+  db_dir = "cisTarget_databases",
+  species = "human",
+  celltype = "celltype",
+  output_dir = "scenic_output",
+  n_cores = 8
+)
+}
+}
