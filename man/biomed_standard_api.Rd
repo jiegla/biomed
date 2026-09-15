@@ -63,7 +63,26 @@ Venn also supports TIFF. Optimized cutoffs and same-data ROC estimates are
 exploratory and require independent validation. Additional options retain the
 original names when passed through \code{...}. See README for migration details.}
 \examples{
-d <- data.frame(group = rep(c("A", "B"), each = 5), marker = c(1:5, 3:7))
-batch_anova(d, "marker")
-make_group(d, "marker")
+clinical <- data.frame(
+  arm = factor(rep(c("TKI", "ICI"), each = 10)),
+  response = factor(rep(c("No", "Yes"), 10)),
+  PFS = seq_len(20),
+  PFS_status = rep(c(1, 0, 1, 1, 0), 4),
+  PD_L1 = c(1:10, 5:14),
+  TMB = c(10:1, 8:17)
+)
+
+make_group(clinical, "PD_L1", method = "median")
+batch_anova(clinical, variables = c("PD_L1", "TMB"), group = "arm")
+batch_chi_square(clinical, variables = "arm", response = "response")
+batch_cox(clinical, variables = c("PD_L1", "TMB"),
+  time = "PFS", status = "PFS_status")
+
+\dontrun{
+batch_roc(clinical, variables = c("PD_L1", "TMB"), response = "response")
+plot_roc(clinical, variables = c("PD_L1", "TMB"), response = "response")
+plot_donut(clinical, variables = c("arm", "response"))
+plot_stacked_bar(clinical, variables = "response", group = "arm")
+plot_venn(list(TKI = c("EGFR", "TP53"), ICI = c("TP53", "LRP1B")))
+}
 }
