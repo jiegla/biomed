@@ -75,4 +75,15 @@ sce_plot_pathway_rds_continuous(
 \value{Invisibly, a list with plots (retained only when keep_plots is TRUE), summary, log and images.}
 \description{Read pathway score tables, align barcodes and generate continuous spatial maps across selected pathways, RDS files and images.}
 \details{Accepts RDS matrices, data frames, Seurat metadata, or lists containing a score table. Spot-by-pathway and pathway-by-spot orientations are recognized by barcode matches, and barcode columns are supported. Only numeric score columns with finite values are used. Each pathway needs at least ten valid spots. Temporary metadata is added to a local copy. PNG and PDF files are saved by default, with pathway_plot_summary.csv and pathway_plot_log.csv when results exist. Calls sce_plot_spatial_continuous directly; no manual source call is needed. Missing files and individual failed plots are reported and skipped; inspect the returned log.}
-
+\examples{
+\dontrun{
+spatial <- readRDS("spatial_seurat.rds")
+result <- sce_plot_pathway_rds_continuous(
+  spatial,
+  score_dir = "gmt_pathway_scores",
+  selected_pathways = c("GABAergic", "Neuropeptide_Pain"),
+  output_dir = "Spatial_pathway_continuous"
+)
+result$summary
+}
+}
