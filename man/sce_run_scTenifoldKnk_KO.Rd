@@ -95,4 +95,16 @@ sce_run_scTenifoldKnk_KO(
 \value{Invisibly, a named list of per-gene bundles containing result, diffRegulation, significant, top, plots, manifold_data, enrichment, parameters, input_summary and run_dir.}
 \description{Select cells and raw-count genes, run one or more virtual knockouts, and export perturbation tables, figures, parameters and analysis bundles.}
 \details{Uses raw nonnegative counts, not normalized expression. Each KO is run separately. The FC statistic measures perturbation and is not a signed gene-expression log fold change. Gene caps always retain requested KO genes and may therefore be exceeded by those forced genes. The original QC argument names remain supported: scTenifoldKnk 1.1 and later receive qc_maxMTratio, qc_minLibSize and qc_minPCT; the latter is qc_minCells divided by the number of selected input cells, capped at one. Filtering details remain those of the installed backend version. Random-number state is restored on return. Network annotation and optional enrichR analysis access the Enrichr service and submit gene identifiers when enabled. Default outputs include XLSX tables, PNG/PDF figures, raw results and analysis-bundle RDS files, parameters and summary TXT files, and session information.}
-
+\examples{
+\dontrun{
+sce <- readRDS("annotated_seurat.rds")
+ko <- sce_run_scTenifoldKnk_KO(
+  object = sce,
+  gKO = c("RAMP1", "GABBR1"),
+  subset_col = "celltype",
+  subset_values = "Macrophage",
+  output_dir = "scTenifoldKnk_KO",
+  nCores = 4
+)
+}
+}
