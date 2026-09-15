@@ -12,3 +12,10 @@ sce_cell_cycle(seurat_obj, species = c("human", "mouse"), assay = NULL, ...)
 }
 \description{Single-cell utility adapted from the contributed workflow, with explicit package dependencies and cell alignment.}
 \value{The Seurat object with S.Score, G2M.Score and Phase metadata. Cell identities are preserved.}
+\examples{
+\dontrun{
+sce <- readRDS("seurat.rds")
+sce <- sce_cell_cycle(sce, species = "human", assay = "RNA")
+table(sce$Phase)
+}
+}
