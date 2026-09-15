@@ -36,3 +36,15 @@ batch_surv(pdata, variable, time = "time", status = "status",
 \description{Fit univariable Cox models with eligibility thresholds, optional cutoff selection, multiple-testing adjustment and detailed failure reporting. Prefer batch_survival for standardized names.}
 \value{A tibble with ID, cox_variable, term, HR, lower95, upper95, P, N, Event, Censored, warning and optional FDR/cutoff summaries. Multiple factor contrasts are retained. Failures are available as attributes or list elements with return_failed = TRUE.}
 \details{Data-driven cutoffs are exploratory. Cox P values and confidence intervals computed after selecting a cutoff are not adjusted for cutoff selection; BH correction across contrasts does not remove that selection bias. Validate selected cutoffs in independent data. Batch fit warnings are retained in the warning column.}
+\examples{
+\dontrun{
+surv_data <- data.frame(
+  time = seq(3, 90, length.out = 40),
+  status = rep(c(1, 0, 1, 1), 10),
+  marker1 = seq_len(40),
+  marker2 = rev(seq_len(40))
+)
+batch_surv(surv_data, variable = c("marker1", "marker2"),
+  time = "time", status = "status", min_sample = 20, verbose = FALSE)
+}
+}
