@@ -47,3 +47,16 @@ sce_compare_gene_expression_groups(
 }
 \description{Single-cell utility adapted from the contributed workflow, with explicit package dependencies and cell alignment.}
 \value{A named list per grouping variable containing parameters, summaries, tests, detection rates, analysis data, plots and output files.}
+\examples{
+\dontrun{
+sce <- readRDS("annotated_seurat.rds")
+result <- sce_compare_gene_expression_groups(
+  sce,
+  genes = c("PDCD1", "LAG3", "CXCL13"),
+  statistic_group = "response",
+  split_by_celltype = "celltype",
+  sample_col = "orig.ident",
+  statistic_level = "samples"
+)
+}
+}
