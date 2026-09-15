@@ -21,3 +21,13 @@ best_cutoff(pdata, variable, time = "time",
 \description{Find a maximally selected survival cutoff, with optional fallback to a valid observed value nearest the median. Prefer find_survival_cutoff for a standardized interface.}
 \value{A list with pdata, best_cutoff, cutoff_method, reason and, on success, group_column. Clean complete observations are returned. Low includes values equal to the cutoff. Existing columns are preserved by choosing a unique group column name.}
 \details{Data-driven cutoffs are exploratory. Cox P values and confidence intervals computed after selecting a cutoff are not adjusted for cutoff selection; BH correction across contrasts does not remove that selection bias. Validate selected cutoffs in independent data. Batch fit warnings are retained in the warning column.}
+\examples{
+\dontrun{
+surv_data <- data.frame(
+  time = c(6, 8, 12, 15, 18, 21, 24, 30, 36, 42),
+  status = c(1, 1, 0, 1, 0, 1, 0, 1, 0, 0),
+  biomarker = c(2.1, 3.0, 1.7, 5.2, 4.1, 6.3, 2.8, 7.1, 3.5, 5.9)
+)
+best_cutoff(surv_data, "biomarker", time = "time", status = "status")
+}
+}
