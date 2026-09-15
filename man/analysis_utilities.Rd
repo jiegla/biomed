@@ -64,14 +64,29 @@ Utilities for reproducible grouping, one-way ANOVA, categorical association
 tests, univariable Cox regression, and ROC analysis.
 }
 \examples{
-d <- data.frame(
-  group = factor(rep(c("A", "B"), each = 5)),
-  marker = c(1:5, 4:8),
-  status = rep(c(0, 1), 5),
-  time = seq_len(10)
+clinical <- data.frame(
+  group = factor(rep(c("A", "B"), each = 10)),
+  response = factor(rep(c(0, 1), 10)),
+  time = seq_len(20),
+  status = rep(c(1, 0, 1, 1, 0), 4),
+  marker1 = c(1:10, 5:14),
+  marker2 = c(10:1, 8:17)
 )
-makegroup(d, "marker")
-anova_batch(d, target = "group", feature = "marker")
-chi_square_batch_df(d, "group", response = "status")
-cox_batch("marker", d, time = "time", status = "status")
+
+# Create Low/High groups from a continuous biomarker
+makegroup(clinical, "marker1", method = "median")
+
+# Batch ANOVA and categorical association
+anova_batch(clinical, target = "group", feature = c("marker1", "marker2"))
+chi_square_batch_df(clinical, "group", response = "response")
+
+# Univariable Cox regression
+cox_batch(c("marker1", "marker2"), clinical, time = "time", status = "status")
+
+\dontrun{
+# ROC summaries and plots require optional ROC/plotting dependencies
+roc_batch(c("marker1", "marker2"), clinical, outcome = "response")
+plot_roc_batch(clinical, response = "response",
+  variables = c("marker1", "marker2"), fig.path = "ROC")
+}
 }
