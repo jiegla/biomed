@@ -3,6 +3,8 @@
 #' @param max_length Maximum number of characters, between 1 and 200.
 #' @return A character vector; missing inputs stay missing. Empty and reserved
 #'   names become safe names. This function does not guarantee uniqueness.
+#' @examples
+#' sanitize_filename(c("Figure 1: PFS/OS", "PD-L1 > 50%.pdf"))
 #' @export
 sanitize_filename <- function(x, max_length = 200L) {
   if (!is.character(x)) stop("x must be a character vector.")
