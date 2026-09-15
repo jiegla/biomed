@@ -19,4 +19,12 @@ sce_calculate_cell_fraction(
 \value{A tibble with orig.ident, celltype_major, cell_number and fraction columns.}
 \description{Count cells in each observed sample and cell-type combination and write an Excel table.}
 \details{The original fixed output column names are retained even when custom metadata columns are supplied. Only observed combinations are reported; missing labels form their own groups, as in the contributed script. The Excel file is written by default.}
-
+\examples{
+\dontrun{
+sce <- readRDS("annotated_seurat.rds")
+fraction <- sce_calculate_cell_fraction(sce,
+  sample_col = "orig.ident", celltype_col = "celltype",
+  output_file = "celltype_fraction_by_sample.xlsx")
+head(fraction)
+}
+}
