@@ -33,4 +33,18 @@ sce_run_two_group_deg_enrichment(
 \value{Invisibly, a list containing deg, ora, gsea, ora_objects, gsea_objects, ora_plots, gsea_plots, status, config and input/output metadata.}
 \description{Run Seurat differential expression, optional ORA and GSEA, and export tables, plots and enrichment objects by cell type.}
 \details{Positive fold changes refer to ident_1 relative to ident_2. Missing GMT configuration skips enrichment while retaining DEG analysis. Cells are the observations in FindMarkers; this workflow is not a replicate-level pseudobulk model. A status table records failed and skipped steps, so inspect it even when the function returns. Config sections are de, thresholds, gene_id, gmt, ora, gsea, plot and export; see the packaged example YAML under system.file('examples', 'sce_deg_config.yml', package = 'biomed'). Config accepts a nested list or YAML file. The default gene identifier is SYMBOL; differing identifier types require AnnotationDbi and the configured organism annotation package. Default exports include Excel tables, per-cell-type RDA enrichment objects and plots, PNG/PDF figures, the complete results RDA and the resolved configuration.}
-
+\examples{
+\dontrun{
+sce <- readRDS("annotated_seurat.rds")
+result <- sce_run_two_group_deg_enrichment(
+  input_file = sce,
+  group_col = "response",
+  ident_1 = "Responder",
+  ident_2 = "Non-responder",
+  celltype_col = "celltype",
+  gmt_dir = "genesets",
+  output_dir = "DEG_enrichment"
+)
+result$status
+}
+}
