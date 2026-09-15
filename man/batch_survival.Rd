@@ -30,3 +30,17 @@ batch_survival(data, variables, time = "time", status = "status",
 \description{Fit univariable Cox models for multiple predictors with eligibility thresholds, optional cutoff selection, multiple-testing adjustment and detailed failure reporting.}
 \value{A list with results, failed and cutoffs tables. Results use variable, hr, conf_low, conf_high, p_value, n, events, censored, warning and optional p_adjusted/cutoff columns. A factor produces one row per nonreference contrast. Optional output is survival.xlsx.}
 \details{Data-driven cutoffs are exploratory. Cox P values and confidence intervals computed after selecting a cutoff are not adjusted for cutoff selection; BH correction across contrasts does not remove that selection bias. Validate selected cutoffs in independent data. Batch fit warnings are retained in the warning column.}
+\examples{
+\dontrun{
+surv_data <- data.frame(
+  PFS = seq(3, 90, length.out = 40),
+  PFS_status = rep(c(1, 0, 1, 1), 10),
+  PD_L1 = seq_len(40),
+  TMB = rev(seq_len(40))
+)
+result <- batch_survival(surv_data, variables = c("PD_L1", "TMB"),
+  time = "PFS", status = "PFS_status")
+result$results
+result$failed
+}
+}
