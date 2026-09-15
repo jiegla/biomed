@@ -27,3 +27,11 @@ sce_add_seurat_metadata(
 }
 \description{Single-cell utility adapted from the contributed workflow, with explicit package dependencies and cell alignment.}
 \value{The updated Seurat object, with cells in their original order.}
+\examples{
+\dontrun{
+sce <- readRDS("annotated_seurat.rds")
+sce <- sce_add_seurat_metadata(sce,
+  metadata_file = "sample_metadata.xlsx",
+  sample_col = "orig.ident")
+}
+}
