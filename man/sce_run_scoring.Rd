@@ -17,3 +17,14 @@ sce_run_scoring(sce, gene_sets, method = c("UCell", "GSVA", "AUCell"),
 }
 \description{Single-cell utility adapted from the contributed workflow, with explicit package dependencies and cell alignment.}
 \value{An updated Seurat object, data frame, or numeric matrix as selected by return_type. Rows in score outputs follow the original cell order.}
+\examples{
+\dontrun{
+sce <- readRDS("annotated_seurat.rds")
+gene_sets <- list(
+  Exhaustion = c("PDCD1", "LAG3", "TIGIT", "HAVCR2"),
+  Cytotoxicity = c("NKG7", "GNLY", "GZMB", "PRF1")
+)
+sce <- sce_run_scoring(sce, gene_sets = gene_sets,
+  method = "UCell", prefix = "Pathway")
+}
+}
