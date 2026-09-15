@@ -28,3 +28,14 @@ plot_correlation(data, x, y, group = NULL,
 \description{Compute correlation and plot the same filtered observations. Supports Pearson, Spearman and Kendall tests, group colors, labels, regression lines, density contours and optional export.}
 \value{A ggplot invisibly, with a correlation attribute containing x, y, method, n, estimate and p_value. Insufficient or constant data warns and returns NULL.}
 \details{Correlation is computed across all retained observations. In grouped plots, regression lines are fitted separately within each group. Numeric factor labels are converted to their numeric values. Non-numeric values and infinities cause an error.}
+\examples{
+\dontrun{
+biomarker <- data.frame(
+  PD_L1 = c(1, 5, 10, 20, 30, 50, 70, 90),
+  TMB = c(2.1, 2.4, 3.2, 4.0, 5.1, 6.2, 7.0, 8.4),
+  arm = rep(c("A", "B"), 4)
+)
+plot_correlation(biomarker, x = "PD_L1", y = "TMB", group = "arm",
+  method = "spearman", scale = FALSE)
+}
+}
