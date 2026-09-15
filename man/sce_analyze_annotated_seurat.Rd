@@ -81,3 +81,16 @@ sce_analyze_annotated_seurat(
 }
 \description{Single-cell utility adapted from the contributed workflow, with explicit package dependencies and cell alignment.}
 \value{Invisibly, a list containing composition, marker, correlation, diversity, statistical tables, parameters and output directories.}
+\examples{
+\dontrun{
+sce <- readRDS("annotated_seurat.rds")
+result <- sce_analyze_annotated_seurat(
+  sce,
+  clinical_var = c("response", "stage"),
+  celltype = "celltype",
+  sample_col = "orig.ident",
+  output_dir = "annotated_cell_analysis"
+)
+result$composition
+}
+}
