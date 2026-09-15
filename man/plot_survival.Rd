@@ -31,3 +31,15 @@ plot_survival(data, group, time = "time", status = "status",
 }
 \description{Plot survival curves, risk tables, median survival, global log-rank P values and explicitly directed two-group HRs. Pairwise statistics are retained for more than two groups.}
 \value{A survminer ggsurvplot object. Attribute statistics contains medians, pairwise comparisons, global logrank_p, n, events and excluded counts. Attribute survival_fit stores the fitted curve. NR labels indicate a median or bound was not reached.}
+\examples{
+\dontrun{
+surv_data <- data.frame(
+  arm = factor(rep(c("Control", "Treatment"), each = 20)),
+  PFS = seq(2, 80, length.out = 40),
+  PFS_status = rep(c(1, 0, 1, 1), 10)
+)
+p <- plot_survival(surv_data, group = "arm", time = "PFS",
+  status = "PFS_status", max_time = 60, show_hr = TRUE, risk_table = TRUE)
+p
+}
+}
