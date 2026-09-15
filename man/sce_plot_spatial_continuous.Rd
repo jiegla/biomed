@@ -91,4 +91,17 @@ sce_plot_spatial_continuous(
 \value{A ggplot, or when return_data is TRUE a list with plot, spot_data, surface_data and parameters.}
 \description{Align a gene or numeric metadata feature with spatial spots, apply Gaussian nearest-neighbor smoothing, mask distant regions and optionally overlay an H&E image.}
 \details{Metadata columns take precedence over gene names. At least ten matched, finite spots are required. Smoothing and masking are measured in multiples of median spot spacing. Transformations precede quantile clipping. The surface is a visualization of interpolated values, not additional measurements. The selected image scale must match the resolution of the image stored in the Seurat spatial object. Custom color vectors are accepted, including biomed_colors().}
-
+\examples{
+\dontrun{
+spatial <- readRDS("spatial_seurat.rds")
+p <- sce_plot_spatial_continuous(
+  spatial,
+  feature = "GABBR1",
+  image_scale = "lowres",
+  colors = "magma",
+  show_he = TRUE,
+  show_spots = TRUE
+)
+p
+}
+}
