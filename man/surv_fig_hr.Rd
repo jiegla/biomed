@@ -25,5 +25,15 @@ surv_fig_hr(group_var, df, max_time = 60, time = "OS",
 }
 \description{Compatibility interface for plot_survival, retaining the original text log and median-based display ordering. HRs are always labeled with their actual comparison direction.}
 \value{A survminer ggsurvplot object with statistics and survival_fit attributes, as in plot_survival.}
-
 \details{The registered grid.draw method uses standard print dispatch with newpage = FALSE, allowing ggplot2::ggsave to save the whole survival plot including its risk table. No global helper definition is needed.}
+\examples{
+\dontrun{
+surv_data <- data.frame(
+  Treatment = factor(rep(c("Control", "Treatment"), each = 20)),
+  PFS = seq(2, 80, length.out = 40),
+  PFS_status = rep(c(1, 0, 1, 1), 10)
+)
+surv_fig_hr(group_var = "Treatment", df = surv_data,
+  time = "PFS", status = "PFS_status", max_time = 60, output_dir = NULL)
+}
+}
