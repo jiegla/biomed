@@ -16,3 +16,14 @@ pairwise_survival(data, group, time = "time", status = "status",
 }
 \description{Compare each pair of groups with explicitly named HR direction and separate Cox Wald and log-rank P values.}
 \value{A data frame with group, reference, n, events, hr, conf_low, conf_high, p_value (Cox Wald), logrank_p, warning and p_adjusted (adjusted log-rank). A single group yields a zero-row table.}
+\examples{
+\dontrun{
+surv_data <- data.frame(
+  arm = factor(rep(c("Chemo", "ICI", "AK112"), each = 12)),
+  PFS = seq(2, 72, length.out = 36),
+  PFS_status = rep(c(1, 0, 1), 12)
+)
+pairwise_survival(surv_data, group = "arm", time = "PFS",
+  status = "PFS_status", reference = "Chemo")
+}
+}
