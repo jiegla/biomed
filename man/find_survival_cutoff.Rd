@@ -19,3 +19,16 @@ find_survival_cutoff(data, variable, time = "time", status = "status",
 \description{Find a maximally selected survival cutoff with minimum group sizes and an optional median fallback.}
 \value{A list with data, cutoff, method, reason and, on success, group_column. The added factor has levels Low and High, with Low including the cutoff. Failure returns an NA cutoff and a reason.}
 \details{Data-driven cutoffs are exploratory. Cox P values and confidence intervals computed after selecting a cutoff are not adjusted for cutoff selection; BH correction across contrasts does not remove that selection bias. Validate selected cutoffs in independent data. Batch fit warnings are retained in the warning column.}
+\examples{
+\dontrun{
+surv_data <- data.frame(
+  time = c(6, 8, 12, 15, 18, 21, 24, 30, 36, 42),
+  status = c(1, 1, 0, 1, 0, 1, 0, 1, 0, 0),
+  biomarker = c(2.1, 3.0, 1.7, 5.2, 4.1, 6.3, 2.8, 7.1, 3.5, 5.9)
+)
+cutoff <- find_survival_cutoff(surv_data, "biomarker",
+  time = "time", status = "status", fallback = "median")
+cutoff$cutoff
+cutoff$data
+}
+}
